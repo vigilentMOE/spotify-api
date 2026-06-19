@@ -6,6 +6,7 @@ This project provides tools to interact with the Spotify API, allowing users to 
 
 - **Search Artists**: Search for artists by name and display their details (such as artist ID) in a tabulated format.
 - **Get Artist Genres**: Retrieve and display the genres associated with a specific artist. Requires artist ID
+- **Create Playlist from stats.fm**: Read a public [stats.fm](https://stats.fm) profile and build a Spotify playlist of that user's top tracks in *your* account.
 
 ## Requirements
 
@@ -107,3 +108,47 @@ Artist: Taylor Swift
 |   1 | pop     |
 +-----+---------+
 ```
+
+### Create Playlist from a stats.fm profile
+
+`create-playlist.py` reads a **public** stats.fm profile (no auth) and creates a
+playlist in your own Spotify account from that user's top tracks.
+
+Because writing to your account requires user authorization, this script uses the
+OAuth Authorization Code flow (not the client-credentials flow the other scripts
+use). One-time setup:
+
+1. In the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard),
+   open your app and add a Redirect URI that matches `SPOTIFY_REDIRECT_URI`
+   (default `http://127.0.0.1:8888/callback`).
+2. Ensure your `.env` has `SPOTIFY_CLIENT_ID`, `SPOTIFY_SECRET`, and optionally
+   `SPOTIFY_REDIRECT_URI`.
+
+The first run opens a browser to authorize; the token is cached locally for
+subsequent runs.
+
+```sh
+# Create a playlist of 200 all-time top tracks (default), private:
+python create-playlist.py https://stats.fm/chamerence/tracks
+
+# A bare username also works, plus options:
+python create-playlist.py chamerence --limit 200 --range lifetime --public --name "Chamerence All-Time"
+
+# Preview which tracks would be added without touching Spotify:
+python create-playlist.py chamerence --dry-run
+```
+
+Options:
+
+| Flag | Default | Description |
+| --- | --- | --- |
+| `--limit` | `200` | Number of top tracks to add |
+| `--range` | `lifetime` | `weeks`, `months`, or `lifetime` (all time) |
+| `--name` | auto | Playlist name |
+| `--public` | off (private) | Make the playlist public |
+| `--dry-run` | off | Print track IDs only; don't create a playlist |
+
+Notes: only public profiles work (stats.fm lets users hide top tracks); tracks
+in the stats.fm catalog with no Spotify match are skipped, so the script
+over-fetches to still reach your requested count. The created playlist's URL is
+printed to stdout on success.
