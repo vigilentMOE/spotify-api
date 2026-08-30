@@ -1,4 +1,3 @@
-Grouped 760 playlists into 98 proposed subfolder(s).
 # Proposed playlist folders
 
 Snapshot taken: 2026-08-30T23:50:22.081164+00:00

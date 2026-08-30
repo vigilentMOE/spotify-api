@@ -1,0 +1,376 @@
+<title>Folder Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=JetBrains+Mono:wght@500&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+  :root {
+    --bg: #F4F5F7;
+    --surface: #FFFFFF;
+    --surface-2: #EDEFF3;
+    --ink: #1B1F26;
+    --muted: #616B7A;
+    --faint: #8A94A3;
+    --border: #DDE2E9;
+    --accent: #A9640C;
+    --accent-soft: #FBF0DC;
+    --shadow: 0 1px 2px rgba(20, 25, 35, .06), 0 8px 24px -16px rgba(20, 25, 35, .3);
+    --display: "Bricolage Grotesque", "Trebuchet MS", sans-serif;
+    --body: "Source Sans 3", system-ui, -apple-system, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14171C;
+      --surface: #1B1F26;
+      --surface-2: #22272F;
+      --ink: #E9ECF1;
+      --muted: #9AA5B4;
+      --faint: #6E7887;
+      --border: #2C333D;
+      --accent: #E9A23B;
+      --accent-soft: #2B2317;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .8);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14171C;
+    --surface: #1B1F26;
+    --surface-2: #22272F;
+    --ink: #E9ECF1;
+    --muted: #9AA5B4;
+    --faint: #6E7887;
+    --border: #2C333D;
+    --accent: #E9A23B;
+    --accent-soft: #2B2317;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .8);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 40px 24px 96px; }
+
+  header.masthead { display: flex; flex-direction: column; gap: 14px; margin-bottom: 28px; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--accent);
+  }
+  h1 {
+    font-family: var(--display); font-weight: 700; font-size: clamp(30px, 4vw, 44px);
+    line-height: 1.05; margin: 0; text-wrap: balance; letter-spacing: -.02em;
+  }
+  .lede { color: var(--muted); max-width: 66ch; margin: 0; font-size: 16px; }
+
+  .stats { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+  .stat {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 16px; box-shadow: var(--shadow); min-width: 120px;
+  }
+  .stat b {
+    display: block; font-family: var(--mono); font-size: 21px; font-weight: 500;
+    font-variant-numeric: tabular-nums; color: var(--ink);
+  }
+  .stat span {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--faint);
+  }
+
+  .notice {
+    border-left: 3px solid var(--accent); background: var(--accent-soft);
+    border-radius: 0 8px 8px 0; padding: 14px 18px; margin: 24px 0 8px;
+    font-size: 14px; color: var(--ink); max-width: 78ch;
+  }
+  .notice strong { font-weight: 600; }
+
+  .controls {
+    position: sticky; top: 0; z-index: 20; background: var(--bg);
+    padding: 16px 0 14px; margin: 16px 0 8px;
+    border-bottom: 1px solid var(--border);
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  }
+  input[type="search"] {
+    flex: 1 1 260px; min-width: 200px; font-family: var(--body); font-size: 14px;
+    padding: 9px 13px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--ink);
+  }
+  input[type="search"]:focus-visible, button:focus-visible, label:focus-within {
+    outline: 2px solid var(--accent); outline-offset: 2px;
+  }
+  .toggle {
+    display: inline-flex; align-items: center; gap: 7px; font-size: 13px;
+    color: var(--muted); cursor: pointer; user-select: none;
+    border: 1px solid var(--border); background: var(--surface);
+    padding: 8px 13px; border-radius: 8px; white-space: nowrap;
+  }
+  .toggle input { accent-color: var(--accent); margin: 0; }
+  button.reset {
+    font-family: var(--body); font-size: 13px; color: var(--muted); cursor: pointer;
+    border: 1px solid var(--border); background: var(--surface);
+    padding: 8px 13px; border-radius: 8px;
+  }
+  button.reset:hover { color: var(--ink); border-color: var(--faint); }
+
+  .layout { display: grid; grid-template-columns: 232px 1fr; gap: 32px; align-items: start; }
+  @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } nav.index { position: static !important; } }
+
+  nav.index { position: sticky; top: 84px; font-size: 13px; }
+  nav.index h2 {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--faint); margin: 0 0 10px; font-weight: 500;
+  }
+  nav.index .grp { margin-bottom: 18px; }
+  nav.index .grp > span {
+    display: block; font-family: var(--display); font-weight: 700; font-size: 12px;
+    letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px;
+  }
+  nav.index a {
+    display: flex; justify-content: space-between; gap: 8px; padding: 3px 0;
+    color: var(--muted); text-decoration: none; border-radius: 4px;
+  }
+  nav.index a:hover { color: var(--ink); }
+  nav.index a em { font-family: var(--mono); font-style: normal; font-size: 11px; color: var(--faint); }
+
+  section.folder { margin-bottom: 44px; scroll-margin-top: 96px; }
+  section.folder > header { margin-bottom: 14px; }
+  .folder-top {
+    font-family: var(--mono); font-size: 11px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--accent);
+  }
+  .folder h3 {
+    font-family: var(--display); font-weight: 700; font-size: 24px; margin: 2px 0 0;
+    letter-spacing: -.01em;
+  }
+
+  .bins { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 14px; }
+  .bin {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px 16px 15px; box-shadow: var(--shadow);
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .bin.soft { background: var(--surface-2); box-shadow: none; }
+  .bin.done { opacity: .45; }
+  .bin > header { display: flex; align-items: baseline; gap: 8px; }
+  .bin h4 {
+    font-family: var(--display); font-weight: 700; font-size: 15px; margin: 0; flex: 1;
+    letter-spacing: -.005em;
+  }
+  .bin .count {
+    font-family: var(--mono); font-size: 12px; color: var(--faint);
+    font-variant-numeric: tabular-nums;
+  }
+  .bin .check { display: inline-flex; cursor: pointer; }
+  .bin .check input { accent-color: var(--accent); margin: 0; cursor: pointer; }
+
+  ul.chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 5px; }
+  ul.chips li {
+    font-size: 12.5px; line-height: 1.35; padding: 3px 8px; border-radius: 5px;
+    background: var(--bg); border: 1px solid var(--border); color: var(--ink);
+  }
+  .bin.soft ul.chips li { background: var(--surface); }
+  ul.chips li i {
+    font-style: normal; font-family: var(--mono); font-size: 10px;
+    color: var(--faint); margin-left: 5px; font-variant-numeric: tabular-nums;
+  }
+  ul.chips li.hit { border-color: var(--accent); background: var(--accent-soft); }
+
+  .empty { color: var(--faint); font-size: 14px; padding: 24px 0; }
+  footer.foot {
+    margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: var(--faint); font-size: 13px; max-width: 72ch;
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="masthead">
+    <div class="eyebrow">Spotify library · 2026-08-30</div>
+    <h1>Folder Plan</h1>
+    <p class="lede">A proposed genre split for the playlists inside <strong>RADIO LAUNCHPAD</strong>
+    and <strong>NICHE MIXES</strong>. Each card below is one subfolder to create; tick it off once
+    you've dragged its playlists across in the Spotify app.</p>
+    <div class="stats">
+      <div class="stat"><b>760</b><span>playlists</span></div>
+      <div class="stat"><b>21</b><span>folders today</span></div>
+      <div class="stat"><b>98</b><span>proposed bins</span></div>
+      <div class="stat"><b>57</b><span>confident bins</span></div>
+      <div class="stat"><b>60%</b><span>firmly placed</span></div>
+    </div>
+  </header>
+
+  <div class="notice">
+    <strong>Why this is a worksheet and not a script.</strong> The Spotify Web API has no endpoint
+    for playlist folders — it cannot read, create, or move them — so the moves have to be made by
+    hand. It also cannot see your personalised <em>Mix</em> and <em>Radio</em> playlists at all, so
+    their genres were derived from the playlist name and, for <em>Radio</em> playlists, from the
+    seed track's artists.
+  </div>
+
+  <div class="controls">
+    <input type="search" id="q" placeholder="Find a playlist by name…" aria-label="Find a playlist by name">
+    <label class="toggle"><input type="checkbox" id="hideSoft"> Hide unclassified &amp; misc</label>
+    <label class="toggle"><input type="checkbox" id="hideDone"> Hide finished</label>
+    <button class="reset" id="reset">Clear ticks</button>
+  </div>
+
+  <div class="layout">
+    <nav class="index" id="index" aria-label="Folder index"><h2>Folders</h2></nav>
+    <main id="main"></main>
+  </div>
+
+  <footer class="foot">
+    Percentages show how much of a playlist's genre signal falls in the assigned family — 100%
+    means every genre found pointed the same way. Bins holding fewer than three playlists are
+    pooled into <em>Misc</em>; playlists whose genres split evenly land in <em>Mixed</em>, and ones
+    with no genre signal at all in <em>Unclassified</em>.
+  </footer>
+</div>
+
+<script>
+const DATA = [{"top": "NICHE MIXES", "sub": "Chill / Focus Mixes", "buckets": [{"name": "Vaporwave / Synthwave", "soft": false, "items": [{"n": "Calm Vaporwave Mix", "c": 100, "g": "Calm Vaporwave Mix"}, {"n": "Chill Vaporwave Mix", "c": 100, "g": "Chill Vaporwave Mix"}, {"n": "Focus Vaporwave Mix", "c": 100, "g": "Focus Vaporwave Mix"}, {"n": "Instrumental Vaporwave Mix", "c": 100, "g": "Instrumental Vaporwave Mix"}, {"n": "Late Night Vaporwave Mix", "c": 100, "g": "Late Night Vaporwave Mix"}, {"n": "Lo-Fi Vaporwave Mix", "c": 100, "g": "Lo-Fi Vaporwave Mix"}, {"n": "Retro Vaporwave Mix", "c": 100, "g": "Retro Vaporwave Mix"}, {"n": "Summer Vaporwave Mix", "c": 100, "g": "Summer Vaporwave Mix"}]}, {"name": "Jazz / Blues", "soft": false, "items": [{"n": "Afternoon Jazz Mix", "c": 100, "g": "Afternoon Jazz Mix"}, {"n": "Brazilian Jazz Mix", "c": 100, "g": "Brazilian Jazz Mix"}, {"n": "Chill Jazz Mix", "c": 100, "g": "Chill Jazz Mix"}, {"n": "Instrumental Jazz Mix", "c": 100, "g": "Instrumental Jazz Mix"}, {"n": "Jazz Fusion Mix", "c": 100, "g": "Jazz Fusion Mix"}, {"n": "Morning Jazz Mix", "c": 100, "g": "Morning Jazz Mix"}, {"n": "Relaxing Jazz Mix", "c": 100, "g": "Relaxing Jazz Mix"}]}, {"name": "Classical / Orchestral", "soft": false, "items": [{"n": "Christmas Symphony Orchestra Mix", "c": 100, "g": "Christmas Symphony Orchestra Mix"}, {"n": "Cinematic Orchestra Mix", "c": 100, "g": "Cinematic Orchestra Mix"}, {"n": "Classical Studying Mix", "c": 100, "g": "Classical Studying Mix"}, {"n": "Gentle Classical Sleep Mix", "c": 100, "g": "Gentle Classical Sleep Mix"}, {"n": "Orchestra Mix", "c": 100, "g": "Orchestra Mix"}, {"n": "Orchestral Pop Mix", "c": 100, "g": "Orchestral Pop Mix"}, {"n": "Relaxing Classical Mix", "c": 100, "g": "Relaxing Classical Mix"}, {"n": "Soft Classical Mix", "c": 100, "g": "Soft Classical Mix"}, {"n": "Symphony Orchestra Mix", "c": 100, "g": "Symphony Orchestra Mix"}]}, {"name": "Sad / Melancholy", "soft": false, "items": [{"n": "Melancholy Sad Mix", "c": 100, "g": "Melancholy Sad Mix"}, {"n": "Quiet Sad Mix", "c": 100, "g": "Quiet Sad Mix"}, {"n": "Somber Mix", "c": 100, "g": "Somber Mix"}]}, {"name": "Night / Late Night", "soft": false, "items": [{"n": "Calm Evening Mix", "c": 100, "g": "Calm Evening Mix"}, {"n": "Chill Late Night Mix", "c": 100, "g": "Chill Late Night Mix"}, {"n": "Driving Late Night Mix", "c": 100, "g": "Driving Late Night Mix"}, {"n": "Late Night Mix", "c": 100, "g": "Late Night Mix"}, {"n": "Midnight Mix", "c": 100, "g": "Midnight Mix"}, {"n": "Night Time Mix", "c": 100, "g": "Night Time Mix"}]}, {"name": "Chores / Everyday", "soft": false, "items": [{"n": "Baking Mix", "c": 100, "g": "Baking Mix"}, {"n": "Cooking Mix", "c": 100, "g": "Cooking Mix"}, {"n": "Elevator Music Mix", "c": 100, "g": "Elevator Music Mix"}, {"n": "Walking Mix", "c": 100, "g": "Walking Mix"}]}, {"name": "Ambient / Chill", "soft": false, "items": [{"n": "Background Mix", "c": 100, "g": "Background Mix"}, {"n": "Calming Instrumental Mix", "c": 100, "g": "Calming Instrumental Mix"}, {"n": "Chill Background Mix", "c": 100, "g": "Chill Background Mix"}, {"n": "Downtempo Mix", "c": 100, "g": "Downtempo Mix"}, {"n": "Indie Chill Mix", "c": 100, "g": "Indie Chill Mix"}, {"n": "Liminal Mix", "c": 100, "g": "Liminal Mix"}, {"n": "Peaceful Mix", "c": 100, "g": "Peaceful Mix"}, {"n": "Quiet Mix", "c": 100, "g": "Quiet Mix"}]}, {"name": "Misc (too few to split out)", "soft": true, "items": [{"n": "Afternoon Mix", "c": 100, "g": "Afternoon Mix"}, {"n": "Chill Morning Smooth Mix", "c": 100, "g": "Chill Morning Smooth Mix"}, {"n": "Comforting Mix", "c": 100, "g": "Comforting Mix"}, {"n": "Creative Mix", "c": 100, "g": "Creative Mix"}, {"n": "Dariacore Mix", "c": 100, "g": "Dariacore Mix"}, {"n": "Dark Wave Mix", "c": 100, "g": "Dark Wave Mix"}, {"n": "Dreamo Mix", "c": 100, "g": "Dreamo Mix"}, {"n": "Hopecore Mix", "c": 100, "g": "Hopecore Mix"}, {"n": "Instrumental Hip Hop Mix", "c": 100, "g": "Instrumental Hip Hop Mix"}, {"n": "Japanese Jazz Mix", "c": 100, "g": "Japanese Jazz Mix"}, {"n": "Lo-Fi Beats Mix", "c": 100, "g": "Lo-Fi Beats Mix"}, {"n": "Lo-Fi Mix", "c": 100, "g": "Lo-Fi Mix"}, {"n": "Plunderphonics Mix", "c": 100, "g": "Plunderphonics Mix"}, {"n": "Shoegaze Mix", "c": 100, "g": "Shoegaze Mix"}, {"n": "Suspense Background Mix", "c": 100, "g": "Suspense Background Mix"}, {"n": "slowed & reverbed", "c": 100, "g": "slowed & reverbed"}]}]}, {"top": "NICHE MIXES", "sub": "Chill / Focus Mixes > FOCUS", "buckets": [{"name": "Electronic", "soft": false, "items": [{"n": "Focus Deep House Mix", "c": 100, "g": "Focus Deep House Mix"}, {"n": "Focus EDM Mix", "c": 100, "g": "Focus EDM Mix"}, {"n": "Focus Electronic Upbeat Mix", "c": 100, "g": "Focus Electronic Upbeat Mix"}, {"n": "Focus Techno Mix", "c": 100, "g": "Focus Techno Mix"}]}, {"name": "Workout / Hype", "soft": false, "items": [{"n": "Grind Time Mix", "c": 100, "g": "Grind Time Mix"}, {"n": "Intense Focus Mix", "c": 100, "g": "Intense Focus Mix"}, {"n": "Motivation Focus Mix", "c": 100, "g": "Motivation Focus Mix"}]}, {"name": "Focus / Study", "soft": false, "items": [{"n": "Afternoon Focus Mix", "c": 100, "g": "Afternoon Focus Mix"}, {"n": "Calm Focus Mix", "c": 100, "g": "Calm Focus Mix"}, {"n": "Chill Focus Mix", "c": 100, "g": "Chill Focus Mix"}, {"n": "Chill Study Mix", "c": 100, "g": "Chill Study Mix"}, {"n": "Energizing Focus Mix", "c": 100, "g": "Energizing Focus Mix"}, {"n": "Focus Ambient Mix", "c": 100, "g": "Focus Ambient Mix"}, {"n": "Focus Chill Beats Mix", "c": 100, "g": "Focus Chill Beats Mix"}, {"n": "Focus Homework Mix", "c": 100, "g": "Focus Homework Mix"}, {"n": "Focus Indie Mix", "c": 100, "g": "Focus Indie Mix"}, {"n": "Focus Mix", "c": 100, "g": "Focus Mix"}, {"n": "Focus Morning Mix", "c": 100, "g": "Focus Morning Mix"}, {"n": "Focus Studying Mix", "c": 100, "g": "Focus Studying Mix"}, {"n": "Focus Upbeat Mix", "c": 100, "g": "Focus Upbeat Mix"}, {"n": "Homework Mix", "c": 100, "g": "Homework Mix"}, {"n": "Quiet Focus Mix", "c": 100, "g": "Quiet Focus Mix"}, {"n": "Relaxing Focus Mix", "c": 100, "g": "Relaxing Focus Mix"}, {"n": "Studying Mix", "c": 100, "g": "Studying Mix"}, {"n": "Work Mix", "c": 100, "g": "Work Mix"}]}, {"name": "Misc (too few to split out)", "soft": true, "items": [{"n": "Focus Synthwave Mix", "c": 100, "g": "Focus Synthwave Mix"}, {"n": "Focus Upbeat Jazz Mix", "c": 100, "g": "Focus Upbeat Jazz Mix"}]}]}, {"top": "NICHE MIXES", "sub": "Chill / Focus Mixes > Morning", "buckets": [{"name": "Feel Good / Uplifting", "soft": false, "items": [{"n": "Feel Good Morning Mix", "c": 100, "g": "Feel Good Morning Mix"}, {"n": "Fun Morning Upbeat Mix", "c": 100, "g": "Fun Morning Upbeat Mix"}, {"n": "Good Vibes Morning Mix", "c": 100, "g": "Good Vibes Morning Mix"}, {"n": "Groovy Morning Mix", "c": 100, "g": "Groovy Morning Mix"}, {"n": "Happy Morning Mix", "c": 100, "g": "Happy Morning Mix"}]}, {"name": "Morning / Daytime", "soft": false, "items": [{"n": "Calm Mellow Morning Mix", "c": 100, "g": "Calm Mellow Morning Mix"}, {"n": "Calm Morning Mix", "c": 100, "g": "Calm Morning Mix"}, {"n": "Chill Morning Mix", "c": 100, "g": "Chill Morning Mix"}, {"n": "Chill Morning Relaxing Mix", "c": 100, "g": "Chill Morning Relaxing Mix"}, {"n": "Energizing Morning Upbeat Mix", "c": 100, "g": "Energizing Morning Upbeat Mix"}, {"n": "Gentle Morning Mix", "c": 100, "g": "Gentle Morning Mix"}, {"n": "Gentle Quiet Morning Mix", "c": 100, "g": "Gentle Quiet Morning Mix"}, {"n": "Morning Mix", "c": 100, "g": "Morning Mix"}, {"n": "Morning Summer Mix", "c": 100, "g": "Morning Summer Mix"}, {"n": "Morning Upbeat Mix", "c": 100, "g": "Morning Upbeat Mix"}, {"n": "Morning Wake Up Mix", "c": 100, "g": "Morning Wake Up Mix"}, {"n": "Peaceful Morning Mix", "c": 100, "g": "Peaceful Morning Mix"}, {"n": "Peaceful Soft Morning Mix", "c": 100, "g": "Peaceful Soft Morning Mix"}, {"n": "Sunday Morning Mix", "c": 100, "g": "Sunday Morning Mix"}, {"n": "Wake Up Mix", "c": 100, "g": "Wake Up Mix"}]}, {"name": "Misc (too few to split out)", "soft": true, "items": [{"n": "Breakfast Morning Saturday Mix", "c": 100, "g": "Breakfast Morning Saturday Mix"}, {"n": "Coffee House Morning Mix", "c": 100, "g": "Coffee House Morning Mix"}, {"n": "Cozy Morning Mix", "c": 100, "g": "Cozy Morning Mix"}, {"n": "Happy Morning Breakfast Mix", "c": 100, "g": "Happy Morning Breakfast Mix"}, {"n": "Morning R&B Mix", "c": 100, "g": "Morning R&B Mix"}]}]}, {"top": "NICHE MIXES", "sub": "Happy / Energetic Mixes", "buckets": [{"name": "Vaporwave / Synthwave", "soft": false, "items": [{"n": "Cyberpunk Mix", "c": 100, "g": "Cyberpunk Mix"}, {"n": "Synthwave Mix", "c": 100, "g": "Synthwave Mix"}, {"n": "Trillwave Mix", "c": 100, "g": "Trillwave Mix"}, {"n": "Vaportrap Mix", "c": 100, "g": "Vaportrap Mix"}]}, {"name": "Breakcore / Jungle / DnB", "soft": false, "items": [{"n": "Beats Jungle Mix", "c": 100, "g": "Beats Jungle Mix"}, {"n": "Breakbeat Jungle Mix", "c": 100, "g": "Breakbeat Jungle Mix"}, {"n": "Breakcore Mix", "c": 100, "g": "Breakcore Mix"}, {"n": "Drum and Bass Jungle Mix", "c": 100, "g": "Drum and Bass Jungle Mix"}, {"n": "Drum and Bass Mix", "c": 100, "g": "Drum and Bass Mix"}, {"n": "Glitchcore Mix", "c": 100, "g": "Glitchcore Mix"}, {"n": "Jungle Mix", "c": 100, "g": "Jungle Mix"}, {"n": "Lolicore Mix", "c": 100, "g": "Lolicore Mix"}, {"n": "Nightcore Mix", "c": 100, "g": "Nightcore Mix"}, {"n": "Sigilkore Mix", "c": 100, "g": "Sigilkore Mix"}, {"n": "Weirdcore Mix", "c": 100, "g": "Weirdcore Mix"}]}, {"name": "Phonk / Trap", "soft": false, "items": [{"n": "Dark Trap Mix", "c": 100, "g": "Dark Trap Mix"}, {"n": "Drift Phonk Mix", "c": 100, "g": "Drift Phonk Mix"}, {"n": "Rage Mix", "c": 100, "g": "Rage Mix"}, {"n": "Trap Mix", "c": 100, "g": "Trap Mix"}]}, {"name": "Metal", "soft": false, "items": [{"n": "Blackgaze Mix", "c": 100, "g": "Blackgaze Mix"}, {"n": "Japanese Black Metal Mix", "c": 100, "g": "Japanese Black Metal Mix"}, {"n": "Japanese Death Metal Mix", "c": 100, "g": "Japanese Death Metal Mix"}, {"n": "Japanese Metal Mix", "c": 100, "g": "Japanese Metal Mix"}]}, {"name": "Anime / J-Music / City Pop", "soft": false, "items": [{"n": "Anime Mix", "c": 100, "g": "Anime Mix"}, {"n": "City Pop Mix", "c": 100, "g": "City Pop Mix"}, {"n": "Cowboy Bebop Mix", "c": 100, "g": "Cowboy Bebop Mix"}, {"n": "J-Rock Mix", "c": 100, "g": "J-Rock Mix"}, {"n": "Japanese Indie Mix", "c": 100, "g": "Japanese Indie Mix"}, {"n": "Korean R&B Mix", "c": 100, "g": "Korean R&B Mix"}, {"n": "Otacore Mix", "c": 100, "g": "Otacore Mix"}]}, {"name": "Hip-Hop / Rap", "soft": false, "items": [{"n": "Aesthetic Rap Mix", "c": 100, "g": "Aesthetic Rap Mix"}, {"n": "Boom Bap Mix", "c": 100, "g": "Boom Bap Mix"}, {"n": "Chill Rap Mix", "c": 100, "g": "Chill Rap Mix"}, {"n": "Melodic Rap Mix", "c": 100, "g": "Melodic Rap Mix"}, {"n": "Underground Hip Hop Mix", "c": 100, "g": "Underground Hip Hop Mix"}]}, {"name": "R&B / Soul / Funk", "soft": false, "items": [{"n": "Funky Jazz Mix", "c": 100, "g": "Funky Jazz Mix"}, {"n": "Indie R&B Mix", "c": 100, "g": "Indie R&B Mix"}, {"n": "Indie Soul Mix", "c": 100, "g": "Indie Soul Mix"}, {"n": "Neo Soul Mix", "c": 100, "g": "Neo Soul Mix"}, {"n": "Soul Jazz Mix", "c": 100, "g": "Soul Jazz Mix"}]}, {"name": "Jazz / Blues", "soft": false, "items": [{"n": "Bebop Instrumental Jazz Mix", "c": 100, "g": "Bebop Instrumental Jazz Mix"}, {"n": "Bebop Mix", "c": 100, "g": "Bebop Mix"}, {"n": "Christmas Bebop Mix", "c": 100, "g": "Christmas Bebop Mix"}, {"n": "Fast Upbeat Jazz Mix", "c": 100, "g": "Fast Upbeat Jazz Mix"}, {"n": "Modern Jazz Mix", "c": 100, "g": "Modern Jazz Mix"}]}, {"name": "Rock", "soft": false, "items": [{"n": "Bubblegrunge Mix", "c": 100, "g": "Bubblegrunge Mix"}, {"n": "Gothic Rock Mix", "c": 100, "g": "Gothic Rock Mix"}, {"n": "Indie Rock Mix", "c": 100, "g": "Indie Rock Mix"}, {"n": "Progressive Rock Mix", "c": 100, "g": "Progressive Rock Mix"}, {"n": "Psychedelic Mix", "c": 100, "g": "Psychedelic Mix"}, {"n": "Surf Rock Mix", "c": 100, "g": "Surf Rock Mix"}]}, {"name": "Electronic", "soft": false, "items": [{"n": "90s Big Beat Mix", "c": 100, "g": "90s Big Beat Mix"}, {"n": "Amped Big Beat Mix", "c": 100, "g": "Amped Big Beat Mix"}, {"n": "Big Beat Dance Mix", "c": 100, "g": "Big Beat Dance Mix"}, {"n": "Big Beat Rave Mix", "c": 100, "g": "Big Beat Rave Mix"}, {"n": "Dark EDM Mix", "c": 100, "g": "Dark EDM Mix"}, {"n": "Dark Industrial Techno Mix", "c": 100, "g": "Dark Industrial Techno Mix"}, {"n": "EDM Hard Bass Mix", "c": 100, "g": "EDM Hard Bass Mix"}, {"n": "Electronic Music Mix", "c": 100, "g": "Electronic Music Mix"}, {"n": "Energetic Big Beat Mix", "c": 100, "g": "Energetic Big Beat Mix"}, {"n": "French House Mix", "c": 100, "g": "French House Mix"}, {"n": "IDM Mix", "c": 100, "g": "IDM Mix"}, {"n": "Industrial Techno Mix", "c": 100, "g": "Industrial Techno Mix"}, {"n": "Jersey Club Mix", "c": 100, "g": "Jersey Club Mix"}]}, {"name": "Workout / Hype", "soft": false, "items": [{"n": "Adrenaline Mix", "c": 100, "g": "Adrenaline Mix"}, {"n": "Energetic Mix", "c": 100, "g": "Energetic Mix"}, {"n": "Fast Mix", "c": 100, "g": "Fast Mix"}]}, {"name": "Unclassified", "soft": true, "items": [{"n": "Meme Mix", "c": 0, "g": ""}]}, {"name": "Misc (too few to split out)", "soft": true, "items": [{"n": "Alternative Indie Mix", "c": 100, "g": "Alternative Indie Mix"}, {"n": "Big Beat Hardcore Mix", "c": 100, "g": "Big Beat Hardcore Mix"}, {"n": "Cottagecore Mix", "c": 100, "g": "Cottagecore Mix"}, {"n": "Dream Pop Mix", "c": 100, "g": "Dream Pop Mix"}, {"n": "Groovy Mix", "c": 100, "g": "Groovy Mix"}, {"n": "Happy Indie Mix", "c": 100, "g": "Happy Indie Mix"}, {"n": "Japanese Shoegaze Mix", "c": 100, "g": "Japanese Shoegaze Mix"}, {"n": "Jazz Hip Hop Mix", "c": 100, "g": "Jazz Hip Hop Mix"}, {"n": "Post-Hardcore Mix", "c": 100, "g": "Post-Hardcore Mix"}, {"n": "Synthpop Mix", "c": 100, "g": "Synthpop Mix"}]}]}, {"top": "NICHE MIXES", "sub": "Hype Mixes", "buckets": [{"name": "Hip-Hop / Rap", "soft": false, "items": [{"n": "Angry Rap Mix", "c": 100, "g": "Angry Rap Mix"}, {"n": "Hype Rap Mix", "c": 100, "g": "Hype Rap Mix"}, {"n": "Hype Workout Rap Mix", "c": 100, "g": "Hype Workout Rap Mix"}]}, {"name": "Electronic", "soft": false, "items": [{"n": "170 BPM Running EDM Mix", "c": 100, "g": "170 BPM Running EDM Mix"}, {"n": "Hype EDM Mix", "c": 100, "g": "Hype EDM Mix"}, {"n": "Running Big Beat Mix", "c": 100, "g": "Running Big Beat Mix"}, {"n": "Running EDM Mix", "c": 100, "g": "Running EDM Mix"}]}, {"name": "Workout / Hype", "soft": false, "items": [{"n": "Aggressive Mix", "c": 100, "g": "Aggressive Mix"}, {"n": "Aggressive Workout Mix", "c": 100, "g": "Aggressive Workout Mix"}, {"n": "Angry Workout Mix", "c": 100, "g": "Angry Workout Mix"}, {"n": "Energetic Workout Mix", "c": 100, "g": "Energetic Workout Mix"}, {"n": "Energy Mix", "c": 100, "g": "Energy Mix"}, {"n": "Fast Hype Mix", "c": 100, "g": "Fast Hype Mix"}, {"n": "Feel Good Workout Mix", "c": 100, "g": "Feel Good Workout Mix"}, {"n": "Fun Running Mix", "c": 100, "g": "Fun Running Mix"}, {"n": "Hype Focus Mix", "c": 100, "g": "Hype Focus Mix"}, {"n": "Hype Getting Ready Mix", "c": 100, "g": "Hype Getting Ready Mix"}, {"n": "Hype Motivation Mix", "c": 100, "g": "Hype Motivation Mix"}, {"n": "Hype Running Mix", "c": 100, "g": "Hype Running Mix"}, {"n": "Hype Workout Mix", "c": 100, "g": "Hype Workout Mix"}, {"n": "Old School Workout Mix", "c": 100, "g": "Old School Workout Mix"}, {"n": "Pump Up Running Mix", "c": 100, "g": "Pump Up Running Mix"}, {"n": "Running Mix", "c": 100, "g": "Running Mix"}, {"n": "Weightlifting Mix", "c": 100, "g": "Weightlifting Mix"}]}, {"name": "Misc (too few to split out)", "soft": true, "items": [{"n": "Angry Rage Mix", "c": 100, "g": "Angry Rage Mix"}, {"n": "Hype Anime Mix", "c": 100, "g": "Hype Anime Mix"}, {"n": "Lovecraftian Metal Mix", "c": 100, "g": "Lovecraftian Metal Mix"}, {"n": "Running Rock Mix", "c": 100, "g": "Running Rock Mix"}, {"n": "Workout Rock Mix", "c": 100, "g": "Workout Rock Mix"}]}]}, {"top": "NICHE MIXES", "sub": "Moody / Atmosphere Mixes", "buckets": [{"name": "Punk / Emo / Hardcore", "soft": false, "items": [{"n": "Angst Mix", "c": 100, "g": "Angst Mix"}, {"n": "Emo Mix", "c": 100, "g": "Emo Mix"}, {"n": "Midwest Emo Mix", "c": 100, "g": "Midwest Emo Mix"}]}, {"name": "Dark / Horror / Suspense", "soft": false, "items": [{"n": "Apocalyptic Mix", "c": 100, "g": "Apocalyptic Mix"}, {"n": "Dark Fantasy Mix", "c": 100, "g": "Dark Fantasy Mix"}, {"n": "Dark Fantasy Mix", "c": 100, "g": "Dark Fantasy Mix"}, {"n": "Dark Fantasy Music Mix", "c": 100, "g": "Dark Fantasy Music Mix"}, {"n": "Dark Moody Mix", "c": 100, "g": "Dark Moody Mix"}, {"n": "Dark Sad Mix", "c": 100, "g": "Dark Sad Mix"}, {"n": "Dramatic Suspense Mix", "c": 100, "g": "Dramatic Suspense Mix"}, {"n": "Dungeon Synth Mix", "c": 100, "g": "Dungeon Synth Mix"}, {"n": "Eerie Mix", "c": 100, "g": "Eerie Mix"}, {"n": "Eerie Spooky Mix", "c": 100, "g": "Eerie Spooky Mix"}, {"n": "Gloomy Mix", "c": 100, "g": "Gloomy Mix"}, {"n": "Horror Mix", "c": 100, "g": "Horror Mix"}, {"n": "Horrorcore Mix", "c": 100, "g": "Horrorcore Mix"}, {"n": "Mysterious Mix", "c": 100, "g": "Mysterious Mix"}, {"n": "Post-Apocalyptic Mix", "c": 100, "g": "Post-Apocalyptic Mix"}, {"n": "Suspense Horror Music Mix", "c": 100, "g": "Suspense Horror Music Mix"}, {"n": "Suspense Mix", "c": 100, "g": "Suspense Mix"}, {"n": "Vampire Mix", "c": 100, "g": "Vampire Mix"}]}, {"name": "Sad / Melancholy", "soft": false, "items": [{"n": "Bed Rotting Mix", "c": 100, "g": "Bed Rotting Mix"}, {"n": "Calm Moody Mix", "c": 100, "g": "Calm Moody Mix"}, {"n": "Chill Moody Mix", "c": 100, "g": "Chill Moody Mix"}, {"n": "Crying Moody Mix", "c": 100, "g": "Crying Moody Mix"}, {"n": "Dissociation Mix", "c": 100, "g": "Dissociation Mix"}, {"n": "Escapism Mix", "c": 100, "g": "Escapism Mix"}, {"n": "Late Night Sad Mix", "c": 100, "g": "Late Night Sad Mix"}, {"n": "Lonely Mix", "c": 100, "g": "Lonely Mix"}, {"n": "Melancholy Mix", "c": 100, "g": "Melancholy Mix"}, {"n": "Moody Alternative Mix", "c": 100, "g": "Moody Alternative Mix"}, {"n": "Moody Instrumental Mix", "c": 100, "g": "Moody Instrumental Mix"}, {"n": "Moody Night Mix", "c": 100, "g": "Moody Night Mix"}, {"n": "Moody Rainy Day Mix", "c": 100, "g": "Moody Rainy Day Mix"}, {"n": "Moody Sad Mix", "c": 100, "g": "Moody Sad Mix"}, {"n": "Moody Soft Mix", "c": 100, "g": "Moody Soft Mix"}, {"n": "Sad Instrumental Mix", "c": 100, "g": "Sad Instrumental Mix"}]}, {"name": "Misc (too few to split out)", "soft": true, "items": [{"n": "Ambient Mix", "c": 100, "g": "Ambient Mix"}, {"n": "Atmospheric Mix", "c": 100, "g": "Atmospheric Mix"}, {"n": "Dark Synthwave Mix", "c": 100, "g": "Dark Synthwave Mix"}, {"n": "Horror Movie Mix", "c": 100, "g": "Horror Movie Mix"}, {"n": "Lovecraftian Mix", "c": 100, "g": "Lovecraftian Mix"}, {"n": "Moody Classical Piano Mix", "c": 100, "g": "Moody Classical Piano Mix"}, {"n": "Moody Rock Mix", "c": 100, "g": "Moody Rock Mix"}, {"n": "Soul Crushing Mix", "c": 100, "g": "Soul Crushing Mix"}, {"n": "Suspense Classical Mix", "c": 100, "g": "Suspense Classical Mix"}]}]}, {"top": "NICHE MIXES", "sub": "Romantic Mixes", "buckets": [{"name": "Jazz / Blues", "soft": false, "items": [{"n": "Bossa Nova Jazz Mix", "c": 100, "g": "Bossa Nova Jazz Mix"}, {"n": "Ethiopian Jazz Mix", "c": 100, "g": "Ethiopian Jazz Mix"}, {"n": "Swing Jazz Mix", "c": 100, "g": "Swing Jazz Mix"}]}, {"name": "Romantic / Love", "soft": false, "items": [{"n": "Calm Romantic Mix", "c": 100, "g": "Calm Romantic Mix"}, {"n": "Chill Romantic Mix", "c": 100, "g": "Chill Romantic Mix"}, {"n": "Cozy Love Mix", "c": 100, "g": "Cozy Love Mix"}, {"n": "Gentle Love Mix", "c": 100, "g": "Gentle Love Mix"}, {"n": "Hopeless Romantic Love Mix", "c": 100, "g": "Hopeless Romantic Love Mix"}, {"n": "Hopeless Romantic Soft Mix", "c": 100, "g": "Hopeless Romantic Soft Mix"}, {"n": "Intimate Mix", "c": 100, "g": "Intimate Mix"}, {"n": "Late Night Love Song Mix", "c": 100, "g": "Late Night Love Song Mix"}, {"n": "Love Romantic Mix", "c": 100, "g": "Love Romantic Mix"}, {"n": "Love Song Mix", "c": 100, "g": "Love Song Mix"}, {"n": "Quiet Romantic Mix", "c": 100, "g": "Quiet Romantic Mix"}, {"n": "Relationship Mix", "c": 100, "g": "Relationship Mix"}, {"n": "Soft Romantic Dinner Mix", "c": 100, "g": "Soft Romantic Dinner Mix"}, {"n": "Yearning Mix", "c": 100, "g": "Yearning Mix"}]}, {"name": "Misc (too few to split out)", "soft": true, "items": [{"n": "Romantic Classical Mix", "c": 100, "g": "Romantic Classical Mix"}]}]}, {"top": "NICHE MIXES", "sub": "Soundtrack Mixes", "buckets": [{"name": "Soundtrack / Score", "soft": false, "items": [{"n": "Ambient Soundtrack Mix", "c": 100, "g": "Ambient Soundtrack Mix"}, {"n": "Chill Soundtrack Mix", "c": 100, "g": "Chill Soundtrack Mix"}, {"n": "Cinematic Mix", "c": 100, "g": "Cinematic Mix"}, {"n": "Film Noir Mix", "c": 100, "g": "Film Noir Mix"}, {"n": "Film Score Mix", "c": 100, "g": "Film Score Mix"}, {"n": "Focus Soundtrack Mix", "c": 100, "g": "Focus Soundtrack Mix"}, {"n": "Intense Soundtrack Mix", "c": 100, "g": "Intense Soundtrack Mix"}, {"n": "Movie Mix", "c": 100, "g": "Movie Mix"}, {"n": "Movie Soundtrack Mix", "c": 100, "g": "Movie Soundtrack Mix"}, {"n": "Quiet Soundtrack Mix", "c": 100, "g": "Quiet Soundtrack Mix"}, {"n": "Soundtrack Mix", "c": 100, "g": "Soundtrack Mix"}, {"n": "Television Soundtrack Mix", "c": 100, "g": "Television Soundtrack Mix"}, {"n": "Video Game Music Mix", "c": 100, "g": "Video Game Music Mix"}]}]}, {"top": "RADIO LAUNCHPAD", "sub": "80s 90s", "buckets": [{"name": "Rock", "soft": false, "items": [{"n": "Blow Out Radio", "c": 100, "g": "art rock, alternative rock"}, {"n": "Good Old-Fashioned Lover Boy - Remastered 2011 Radio", "c": 100, "g": "classic rock, rock, glam rock"}, {"n": "Killer Queen - Remastered 2011 Radio", "c": 100, "g": "classic rock, rock, glam rock"}, {"n": "Maneater Radio", "c": 100, "g": "yacht rock, soft rock"}, {"n": "Out of Touch Radio", "c": 100, "g": "yacht rock, soft rock"}, {"n": "Radio Ga Ga - Remastered 2011 Radio", "c": 100, "g": "classic rock, rock, glam rock"}, {"n": "Starman - 2012 Remaster Radio", "c": 100, "g": "glam rock, art rock"}, {"n": "Aegian Sea Radio", "c": 80, "g": "progressive rock, psychedelic rock, baroque pop"}, {"n": "Wind Of Change Radio", "c": 67, "g": "hard rock, glam metal, rock"}]}, {"name": "Pop", "soft": false, "items": [{"n": "Gold - 2022 Remix Radio", "c": 100, "g": "new wave, synthpop"}, {"n": "Head Over Heels Radio", "c": 100, "g": "new wave, synthpop"}, {"n": "Manic Monday Radio", "c": 100, "g": "jangle pop"}, {"n": "Take on Me Radio", "c": 100, "g": "new wave, synthpop"}, {"n": "True - 2003 Remaster Radio", "c": 100, "g": "new wave, synthpop"}]}, {"name": "Mixed / Low Confidence", "soft": true, "items": [{"n": "Words Radio", "c": 38, "g": "uk garage, liquid funk, drum and bass"}]}, {"name": "Unclassified", "soft": true, "items": [{"n": "A Horse with No Name Radio", "c": 0, "g": ""}, {"n": "A Real Hero Radio", "c": 0, "g": ""}, {"n": "Burning Heart - From \"Rocky IV\" Soundtrack Radio", "c": 0, "g": ""}]}, {"name": "Misc (too few to split out)", "soft": true, "items": [{"n": "Crankiss Radio", "c": 100, "g": "shoegaze, dream pop"}, {"n": "Everything She Wants Radio", "c": 100, "g": "christmas"}, {"n": "Lady - Hear Me Tonight Radio", "c": 100, "g": "french house, disco house"}]}]}, {"top": "RADIO LAUNCHPAD", "sub": "BOSSA NOVA", "buckets": [{"name": "Unclassified", "soft": true, "items": [{"n": "Adelaide Radio", "c": 0, "g": ""}, {"n": "Amore Mio Aiutami - Adonai's Version Radio", "c": 0, "g": ""}, {"n": "Amore mio aiutami - Main Theme Radio", "c": 0, "g": ""}, {"n": "Easy Lovers Radio", "c": 0, "g": ""}, {"n": "Mexican Dream Radio", "c": 0, "g": ""}, {"n": "Não Podes Fugir do Teu Destino Radio", "c": 0, "g": ""}, {"n": "Uccidere in silenzio 3 Radio", "c": 0, "g": ""}, {"n": "Violino Radio", "c": 0, "g": ""}]}, {"name": "Misc (too few to split out)", "soft": true, "items": [{"n": "Un facile amore Radio", "c": 100, "g": "italian singer-songwriter"}, {"n": "スウェイ・イット・フラ・ガール Radio", "c": 100, "g": "bossa nova, bolero"}]}]}, {"top": "RADIO LAUNCHPAD", "sub": "CLASSY VOCALS", "buckets": [{"name": "Jazz / Blues", "soft": false, "items": [{"n": "La javanaise Radio", "c": 100, "g": "french jazz, vocal jazz, jazz"}, {"n": "Misty Radio", "c": 100, "g": "jazz, jazz ballads, hard bop"}, {"n": "Stella By Starlight Radio", "c": 100, "g": "jazz, cool jazz, hard bop"}, {"n": "Orange Colored Sky - Remastered 2005 Radio", "c": 80, "g": "christmas, vocal jazz, big band"}]}, {"name": "Unclassified", "soft": true, "items": [{"n": "Heartaches by the Numbers - Rerecorded Radio", "c": 0, "g": ""}, {"n": "Take Good Care Of My Baby Radio", "c": 0, "g": ""}, {"n": "Up and Down Radio", "c": 0, "g": ""}, {"n": "valse de la lune Radio", "c": 0, "g": ""}]}, {"name": "Misc (too few to split out)", "soft": true, "items": [{"n": "Thanks For The Memory Radio", "c": 100, "g": "emo, pop punk"}, {"n": "Le Festin Radio", "c": 67, "g": "french jazz, soundtrack, score"}]}]}, {"top": "RADIO LAUNCHPAD", "sub": "Chill - Atmospheric / Lofi", "buckets": [{"name": "Vaporwave / Synthwave", "soft": false, "items": [{"n": "Sun Point Radio", "c": 100, "g": "vaporwave, j-dance, shibuya-kei"}, {"n": "Touch the Future / Touch the Face of God Radio", "c": 100, "g": "vaporwave"}, {"n": "couldn't even look in my eyes Radio", "c": 100, "g": "vaporwave"}, {"n": "haven.life.jp Radio", "c": 100, "g": "vaporwave"}, {"n": "フィジーSunburst Radio", "c": 100, "g": "vaporwave"}, {"n": "Final Training Session Radio", "c": 80, "g": "vaporwave, chillwave, plunderphonics"}, {"n": "Indoor 園芸 Climate Control Radio", "c": 67, "g": "vaporwave, plunderphonics, chillwave"}, {"n": "地平線に沈む夕日 Radio", "c": 67, "g": "vaporwave, plunderphonics, chillwave"}, {"n": "断線 Radio", "c": 50, "g": "vaporwave, plunderphonics, chillwave"}, {"n": "発見 Radio", "c": 50, "g": "vaporwave, plunderphonics, chillwave"}]}, {"name": "Lo-Fi / Chillhop", "soft": false, "items": [{"n": "1999® Radio", "c": 100, "g": "lo-fi"}, {"n": "Turn Echo Radio", "c": 100, "g": "lo-fi house"}, {"n": "no shame in my game. Radio", "c": 100, "g": "lo-fi, lo-fi beats, lo-fi hip hop"}, {"n": "nothing like sipping a cup of tea Radio", "c": 100, "g": "lo-fi, lo-fi hip hop, lo-fi beats"}, {"n": "Ask for Love Radio", "c": 75, "g": "lo-fi beats, lo-fi, jazz beats"}, {"n": "September 22nd Radio", "c": 67, "g": "lo-fi beats, jazz beats, lo-fi hip hop"}]}, {"name": "Breakcore / Jungle / DnB", "soft": false, "items": [{"n": "Digital rainforest Radio", "c": 100, "g": "breakcore, jungle"}, {"n": "look down there, a path Radio", "c": 100, "g": "breakcore, jungle, speedcore"}, {"n": "Mg1 Radio", "c": 67, "g": "breakcore, speedcore, jungle"}]}, {"name": "Dark / Horror / Suspense", "soft": false, "items": [{"n": "miss this moment Radio", "c": 67, "g": "dark ambient, ambient"}, {"n": "Calm My Tortured Soul Radio", "c": 50, "g": "dark ambient, ambient"}, {"n": "Catalysts for Her Awakening Radio", "c": 50, "g": "dark ambient, ambient"}, {"n": "Cursed Town Radio", "c": 50, "g": "dark ambient, ambient"}, {"n": "Insatiable Creedence Radio", "c": 50, "g": "dark ambient, ambient"}, {"n": "Living the Wrong Place Radio", "c": 50, "g": "dark ambient, ambient"}]}, {"name": "Mixed / Low Confidence", "soft": true, "items": [{"n": "Eternal Hope Radio", "c": 33, "g": "vaporwave, plunderphonics, ambient"}]}, {"name": "Unclassified", "soft": true, "items": [{"n": "A Short Intermission Radio", "c": 0, "g": ""}, {"n": "Aerial Radio", "c": 0, "g": ""}, {"n": "An Old Smile Radio", "c": 0, "g": ""}, {"n": "Blue Light Fixture Radio", "c": 0, "g": ""}, {"n": "Bossa Bossa Radio", "c": 0, "g": ""}, {"n": "CHARON II Radio", "c": 0, "g": ""}, {"n": "Contemporary Radio", "c": 0, "g": ""}, {"n": "Dinner With an Old Puppet Radio", "c": 0, "g": ""}, {"n": "I'm Trippin Radio", "c": 0, "g": ""}, {"n": "Long-Awaited Radio", "c": 0, "g": ""}, {"n": "May we meet again someday Radio", "c": 0, "g": ""}, {"n": "Meet The Pressure Radio", "c": 0, "g": ""}, {"n": "Nightsky (For cats) Radio", "c": 0, "g": ""}, {"n": "Portugal Radio", "c": 0, "g": ""}, {"n": "Precipitation Radio", "c": 0, "g": ""}, {"n": "Recollections of lies Radio", "c": 0, "g": ""}, {"n": "Room 202 Radio", "c": 0, "g": ""}, {"n": "Solo Radio", "c": 0, "g": ""}, {"n": "Something I Always Do Radio", "c": 0, "g": ""}, {"n": "Something is not as it seems Radio", "c": 0, "g": ""}, {"n": "Supreme Radio", "c": 0, "g": ""}, {"n": "Synths Edge Radio", "c": 0, "g": ""}, {"n": "The One in Dreams Radio", "c": 0, "g": ""}, {"n": "Tomorrow Radio", "c": 0, "g": ""}, {"n": "Transcendental train station (Silhouette) Radio", "c": 0, "g": ""}, {"n": "Tropical Dream Wave Radio", "c": 0, "g": ""}, {"n": "Verloren Radio", "c": 0, "g": ""}, {"n": "Waiting Radio", "c": 0, "g": ""}, {"n": "ech0 Radio", "c": 0, "g": ""}, {"n": "ethereal Radio", "c": 0, "g": ""}, {"n": "more than ordinary Radio", "c": 0, "g": ""}, {"n": "mph outro Radio", "c": 0, "g": ""}, {"n": "take a moment Radio", "c": 0, "g": ""}, {"n": "when the world felt real Radio", "c": 0, "g": ""}]}, {"name": "Misc (too few to split out)", "soft": true, "items": [{"n": "Counting Stars Radio", "c": 100, "g": "jazz rap"}, {"n": "La petite fille de la mer - Remastered Radio", "c": 100, "g": "new age"}, {"n": "Living Nightmare Radio", "c": 100, "g": "metal, alternative metal"}, {"n": "What once was Radio", "c": 100, "g": "indie"}, {"n": "rainfall Radio", "c": 100, "g": "shoegaze, slowcore"}, {"n": "shibuya - super slowed Radio", "c": 100, "g": "phonk, brazilian phonk"}, {"n": "Body - slowed Radio", "c": 67, "g": "electroclash, witch house, lo-fi house"}, {"n": "headache Radio", "c": 67, "g": "drone, ambient, slowcore"}, {"n": "Save Room Radio", "c": 50, "g": "japanese vgm, soundtrack"}]}]}, {"top": "RADIO LAUNCHPAD", "sub": "City Pop / Surf Rock", "buckets": [{"name": "Anime / J-Music / City Pop", "soft": false, "items": [{"n": "Kingo Hamada Radio", "c": 100, "g": "city pop"}, {"n": "SHYNESS BOY Radio", "c": 100, "g": "city pop, kayōkyoku, j-pop"}, {"n": "WINDY SUMMER Radio", "c": 100, "g": "city pop, kayōkyoku, j-pop"}, {"n": "街のドルフィン Radio", "c": 100, "g": "city pop"}, {"n": "私達を信じていて Radio", "c": 50, "g": "city pop, j-r&b"}]}, {"name": "Mixed / Low Confidence", "soft": true, "items": [{"n": "Cupcake Break Radio", "c": 33, "g": "vaporwave, city pop, breakcore"}]}, {"name": "Misc (too few to split out)", "soft": true, "items": [{"n": "Selfish High Heels (feat. Macross 82-99 & Harrison) Radio", "c": 50, "g": "vaporwave, city pop, nu disco"}]}]}, {"top": "RADIO LAUNCHPAD", "sub": "Classical", "buckets": [{"name": "Anime / J-Music / City Pop", "soft": false, "items": [{"n": "I'll Always Remember Radio", "c": 100, "g": "japanese classical"}, {"n": "Little Rascal (いたずら天使) - 2007 ver. Radio", "c": 100, "g": "japanese classical"}, {"n": "Market Theater Radio", "c": 100, "g": "japanese classical"}, {"n": "Merry-Go-Round of Life Radio", "c": 100, "g": "japanese classical, anime"}, {"n": "Mother's Grace Radio", "c": 100, "g": "japanese classical"}, {"n": "Passage Radio", "c": 100, "g": "japanese classical"}, {"n": "Sarah's Crime Radio", "c": 100, "g": "japanese classical"}, {"n": "otonami Radio", "c": 100, "g": "japanese classical, japanese indie"}, {"n": "いにしえの宵に Radio", "c": 100, "g": "japanese classical"}, {"n": "ファンタジア Radio", "c": 100, "g": "japanese classical"}, {"n": "哀しみのラプソディー Radio", "c": 100, "g": "japanese classical"}, {"n": "水平線のむこうに Radio", "c": 100, "g": "japanese classical"}, {"n": "Tranquility orchestra Radio", "c": 50, "g": "anime, soundtrack"}]}, {"name": "Unclassified", "soft": true, "items": [{"n": "Comme ce Jour Radio", "c": 0, "g": ""}, {"n": "Crimson Waltz Radio", "c": 0, "g": ""}, {"n": "E8 - Long term dusk glimpses Radio", "c": 0, "g": ""}, {"n": "Johan Liebert Radio", "c": 0, "g": ""}, {"n": "Last Fascination Radio", "c": 0, "g": ""}, {"n": "Moon River Radio", "c": 0, "g": ""}, {"n": "Nocturne in D-Flat Major \"Un rêve\" Radio", "c": 0, "g": ""}, {"n": "Piano in an Empty Room Radio", "c": 0, "g": ""}, {"n": "그녀에게 말하다 Talk to Her Radio", "c": 0, "g": ""}]}, {"name": "Misc (too few to split out)", "soft": true, "items": [{"n": "Clair De Lune - remix Radio", "c": 100, "g": "electronic classical"}, {"n": "For old time's sake Radio", "c": 100, "g": "classic soul, soul"}, {"n": "One in a million Radio", "c": 100, "g": "r&b, contemporary r&b"}, {"n": "Overture Radio", "c": 100, "g": "soundtrack"}, {"n": "The Great Pumpkin Waltz Radio", "c": 100, "g": "jazz, cool jazz"}, {"n": "Bicycle Radio", "c": 50, "g": "christmas, adult standards, vocal jazz"}, {"n": "Mistletoe And Holly Radio", "c": 50, "g": "jazz, christmas"}]}]}, {"top": "RADIO LAUNCHPAD", "sub": "EDM / Vaporwave / + Vocals", "buckets": [{"name": "Vaporwave / Synthwave", "soft": false, "items": [{"n": "Crystals Radio", "c": 100, "g": "synthwave, vaporwave"}, {"n": "Voyager - Original Mix Radio", "c": 100, "g": "synthwave, vaporwave"}, {"n": "Livin' Loose Radio", "c": 67, "g": "vaporwave, chillwave, plunderphonics"}, {"n": "Internet Moms Radio", "c": 50, "g": "vaporwave, city pop"}]}, {"name": "Lo-Fi / Chillhop", "soft": false, "items": [{"n": "U WERE MORE THAN JUST A DREAM Radio", "c": 100, "g": "lo-fi house"}, {"n": "empire Radio", "c": 100, "g": "trip hop"}, {"n": "ok, i can love u. Radio", "c": 50, "g": "lo-fi house, breakcore, jungle"}]}, {"name": "Breakcore / Jungle / DnB", "soft": false, "items": [{"n": "Alone Against the World Radio", "c": 100, "g": "breakcore, jungle"}, {"n": "Angel.Memory Radio", "c": 100, "g": "breakcore, jungle, drum and bass"}, {"n": "FALLEN ANGELS Radio", "c": 100, "g": "breakcore, nightcore"}, {"n": "Fleeting Frozen Heart Radio", "c": 100, "g": "breakcore, jungle, speedcore"}, {"n": "HOLDMECLOSE Radio", "c": 100, "g": "breakcore, jungle, drum and bass"}, {"n": "INSTRUMECHA Radio", "c": 100, "g": "breakcore, speedcore, jungle"}, {"n": "PURGATORY - FlowerBoyDeMii Remix Radio", "c": 100, "g": "breakcore, jungle, speedcore"}, {"n": "Satellite from days of old, lead me to your access code Radio", "c": 100, "g": "breakcore, jungle, drum and bass"}, {"n": "Someone Else's House Radio", "c": 100, "g": "breakcore, jungle"}, {"n": "StreetPass Millionaire Radio", "c": 100, "g": "breakcore"}, {"n": "Subject: Haise Radio", "c": 100, "g": "breakcore, jungle, speedcore"}, {"n": "U WERE MORE THAN JUST A DREAM (Slowed) Radio", "c": 100, "g": "breakcore, jungle"}, {"n": "When She Left This World Radio", "c": 100, "g": "breakcore, jungle, speedcore"}, {"n": "Your eyes are filled with loneliness Radio", "c": 100, "g": "breakcore, jungle, speedcore"}, {"n": "drowning in problems Radio", "c": 100, "g": "breakcore, jungle"}, {"n": "iterate6 Radio", "c": 100, "g": "breakcore, jungle, speedcore"}, {"n": "lain Radio", "c": 100, "g": "breakcore"}, {"n": "living hurts, i want to sleep forever Radio", "c": 100, "g": "breakcore, jungle, shibuya-kei"}, {"n": "memories i never had. Radio", "c": 100, "g": "breakcore, jungle"}, {"n": "net suffering Radio", "c": 100, "g": "breakcore, jungle"}, {"n": "peace? Radio", "c": 100, "g": "breakcore, jungle"}, {"n": "please revere me, my purpose eludes me Radio", "c": 100, "g": "breakcore, speedcore, jungle"}, {"n": "seek pxleblood Radio", "c": 100, "g": "breakcore, jungle"}, {"n": "vision/視覚 Radio", "c": 100, "g": "breakcore"}, {"n": "眠れない Radio", "c": 100, "g": "breakcore, jungle"}, {"n": "Black Is the New Black Radio", "c": 75, "g": "breakcore, speedcore, jungle"}, {"n": "Fine Night Radio", "c": 75, "g": "breakcore, speedcore, jungle"}, {"n": "The Pain of Relief (We Have Our Vices One and All) Radio", "c": 75, "g": "breakcore, speedcore, jungle"}, {"n": "Big Time Freq Radio", "c": 67, "g": "breakcore, speedcore, jungle"}, {"n": "Frenesi - Machine Girl GabberTrap Mix Radio", "c": 67, "g": "breakcore, speedcore, jungle"}, {"n": "HATSUMI Radio", "c": 67, "g": "breakcore, jungle, footwork"}, {"n": "seeyoulaterspacecowboy Radio", "c": 67, "g": "breakcore, jungle, rally house"}, {"n": "AND I'M GONE Radio", "c": 50, "g": "breakcore, hyperpop, speedcore"}, {"n": "ATTACKING VERTICAL Radio", "c": 50, "g": "breakcore, hyperpop, speedcore"}, {"n": "GIRL HELL 1999 Radio", "c": 50, "g": "breakcore, hyperpop, speedcore"}, {"n": "carousel. {iii} Radio", "c": 50, "g": "breakcore, vaporwave"}]}, {"name": "Anime / J-Music / City Pop", "soft": false, "items": [{"n": "Perfect Blue Radio", "c": 100, "g": "anime"}, {"n": "reflection Radio", "c": 100, "g": "japanese classical"}, {"n": "Blood Flow Radio", "c": 67, "g": "japanese vgm, soundtrack"}]}, {"name": "Electronic", "soft": false, "items": [{"n": "Heard It Like This Radio", "c": 100, "g": "tech house"}, {"n": "SDLOVE Radio", "c": 100, "g": "rally house, house"}, {"n": "Shelter Radio", "c": 100, "g": "edm, electronic, french house"}, {"n": "The Weekend - Radio Edit Radio", "c": 100, "g": "disco house"}, {"n": "Be there Radio", "c": 50, "g": "rally house, lo-fi house"}, {"n": "GANJA WEED (sped up) Radio", "c": 50, "g": "rally house, lo-fi house"}, {"n": "LIQUOR STORE (instrumental) Radio", "c": 50, "g": "rally house, lo-fi house"}]}, {"name": "Mixed / Low Confidence", "soft": true, "items": [{"n": "Simple And Clean - Ray Of Hope MIX Radio", "c": 40, "g": "j-r&b, j-pop, anime"}, {"n": "world Radio", "c": 40, "g": "cloud rap, witch house, horrorcore"}]}, {"name": "Unclassified", "soft": true, "items": [{"n": "Fly Away Radio", "c": 0, "g": "vocaloid"}, {"n": "Hatred Radio", "c": 0, "g": ""}, {"n": "Holy Radio", "c": 0, "g": ""}, {"n": "I Want Things to Be Beautiful Radio", "c": 0, "g": ""}, {"n": "It Was Just a Dream Radio", "c": 0, "g": ""}, {"n": "Loose Cannon Radio", "c": 0, "g": ""}, {"n": "Nosebleed Radio", "c": 0, "g": ""}, {"n": "Relax Radio", "c": 0, "g": ""}, {"n": "sour Radio", "c": 0, "g": ""}, {"n": "think about me Radio", "c": 0, "g": "slowcore"}, {"n": "where have you been all my life? Radio", "c": 0, "g": "adult standards"}]}, {"name": "Misc (too few to split out)", "soft": true, "items": [{"n": "Brat Radio", "c": 100, "g": "soundtrack"}, {"n": "Go Away Radio", "c": 100, "g": "alternative rock"}, {"n": "Heavenly Radio", "c": 100, "g": "dream pop"}, {"n": "House of Cards Radio", "c": 100, "g": "art rock, alternative rock"}, {"n": "Little Things x Gypsy Woman - L BEATS MASHUP Radio", "c": 100, "g": "uk r&b"}, {"n": "nothing left Radio", "c": 100, "g": "shoegaze"}, {"n": "substantial Radio", "c": 100, "g": "jazz rap"}, {"n": "arrivederci! Radio", "c": 67, "g": "christmas, adult standards, big band"}, {"n": "BLESSED BY THE FALLEN Radio", "c": 50, "g": "phonk, drift phonk, breakcore"}, {"n": "FINAL FANTASY Radio", "c": 50, "g": "soundtrack, japanese vgm"}, {"n": "M3 N MIN3 Radio", "c": 50, "g": "breakcore, hyperpop, speedcore"}]}]}, {"top": "RADIO LAUNCHPAD", "sub": "HIP HOP", "buckets": [{"name": "Hip-Hop / Rap", "soft": false, "items": [{"n": "4 Your Eyez Only Radio", "c": 100, "g": "rap"}, {"n": "93 'Til Infinity Radio", "c": 100, "g": "jazz rap, old school hip hop"}, {"n": "Can't Hold On Radio", "c": 100, "g": "alternative hip hop"}, {"n": "Cocaine Castle Radio", "c": 100, "g": "rap"}, {"n": "Conductor Radio", "c": 100, "g": "boom bap, alternative hip hop, jazz rap"}, {"n": "DENZEL PUSSY Radio", "c": 100, "g": "cloud rap, underground hip hop, experimental hip hop"}, {"n": "Doomsday Radio", "c": 100, "g": "experimental hip hop, east coast hip hop, jazz rap"}, {"n": "Feather (feat. Cise Starr & Akin from CYNE) Radio", "c": 100, "g": "jazz rap, underground hip hop"}, {"n": "Gas Drawls Radio", "c": 100, "g": "experimental hip hop, east coast hip hop, jazz rap"}, {"n": "Gimme Your's Radio", "c": 100, "g": "east coast hip hop, old school hip hop, boom bap"}, {"n": "Ho Happy Jackie Radio", "c": 100, "g": "east coast hip hop, old school hip hop, boom bap"}, {"n": "Hoe Cakes Radio", "c": 100, "g": "experimental hip hop, east coast hip hop, jazz rap"}, {"n": "IV. Sweatpants Radio", "c": 100, "g": "hyphy, west coast hip hop"}, {"n": "Jazz (We've Got) Radio", "c": 100, "g": "jazz rap, east coast hip hop, old school hip hop"}, {"n": "Jesus Forgive Me, I Am A Thot Radio", "c": 100, "g": "experimental hip hop, alternative hip hop, experimental"}, {"n": "Kon Karne Radio", "c": 100, "g": "experimental hip hop, east coast hip hop, jazz rap"}, {"n": "Kon Queso Radio", "c": 100, "g": "experimental hip hop, east coast hip hop, jazz rap"}, {"n": "Kookies Radio", "c": 100, "g": "jazz rap, alternative hip hop, experimental hip hop"}, {"n": "MADE IN CHINA Radio", "c": 100, "g": "chinese hip hop"}, {"n": "Potato Salad Radio", "c": 100, "g": "rap"}, {"n": "Rapp Snitch Knishes feat. Mr. Fantastik Radio", "c": 100, "g": "experimental hip hop, east coast hip hop, jazz rap"}, {"n": "Red and Gold Radio", "c": 100, "g": "experimental hip hop, east coast hip hop, jazz rap"}, {"n": "Rhymes Like Dimes Radio", "c": 100, "g": "experimental hip hop, east coast hip hop, jazz rap"}, {"n": "Rugged Ruff Radio", "c": 100, "g": "jazz rap"}, {"n": "STICK N STONE Radio", "c": 100, "g": "rap"}, {"n": "Talk About A Girl Radio", "c": 100, "g": "underground hip hop, boom bap"}, {"n": "Terry Radio", "c": 100, "g": "east coast hip hop"}, {"n": "The Alchemist Radio", "c": 100, "g": "alternative hip hop, jazz rap, experimental hip hop"}, {"n": "The Finest Radio", "c": 100, "g": "experimental hip hop, east coast hip hop, jazz rap"}, {"n": "Untitled/Fantastic Radio", "c": 100, "g": "jazz rap"}, {"n": "Vomitspit Radio", "c": 100, "g": "experimental hip hop, east coast hip hop, jazz rap"}, {"n": "愛密集 Radio", "c": 100, "g": "jazz rap, j-rap"}, {"n": "Return of The Crooklyn Dodgers Radio", "c": 93, "g": "east coast hip hop, boom bap, old school hip hop"}, {"n": "DOTS FREESTYLE REMIX Radio", "c": 75, "g": "experimental hip hop, alternative hip hop, experimental"}, {"n": "Fast Life (with Nas) Radio", "c": 75, "g": "east coast hip hop, old school hip hop, hardcore hip hop"}, {"n": "Twinz (Deep Cover 98) (feat. Fat Joe) Radio", "c": 75, "g": "east coast hip hop, old school hip hop, hardcore hip hop"}]}, {"name": "R&B / Soul / Funk", "soft": false, "items": [{"n": "I. Pink Toes Radio", "c": 100, "g": "r&b"}, {"n": "IN YOUR EYES Radio", "c": 100, "g": "alternative r&b, neo soul"}, {"n": "Lotus Flower Bomb (feat. Miguel) Radio", "c": 100, "g": "r&b"}]}, {"name": "Mixed / Low Confidence", "soft": true, "items": [{"n": "Verses from the Abstract (feat. Vinia Mojica & Ron Carter) Radio", "c": 44, "g": "jazz rap, east coast hip hop, old school hip hop"}, {"n": "...And to Those I Love, Thanks for Sticking Around Radio", "c": 40, "g": "emo rap, horrorcore, cloud rap"}, {"n": "AWKWARD CAR DRIVE Radio", "c": 40, "g": "emo rap, horrorcore, cloud rap"}, {"n": "GREY+GREY+GREY Radio", "c": 40, "g": "emo rap, horrorcore, cloud rap"}, {"n": "Badass Radio", "c": 33, "g": "trap metal, emo rap, horrorcore"}, {"n": "Facing Worlds Radio", "c": 33, "g": "trap metal, horrorcore, rap metal"}, {"n": "To Whom It May Concern Radio", "c": 29, "g": "trap metal, emo rap, horrorcore"}]}, {"name": "Unclassified", "soft": true, "items": [{"n": "BUFFALO (feat. Shane Powers) Radio", "c": 0, "g": ""}, {"n": "City Lights (feat. Pase Rock & Substantial) Radio", "c": 0, "g": ""}, {"n": "DOGTOOTH Radio", "c": 0, "g": ""}, {"n": "ENTITY-001 Radio", "c": 0, "g": ""}, {"n": "HOTPOT? Radio", "c": 0, "g": ""}, {"n": "Heartunderblade Radio", "c": 0, "g": ""}, {"n": "PUNK TACTICS Radio", "c": 0, "g": ""}, {"n": "RPG Radio", "c": 0, "g": ""}, {"n": "RUN N SCR3AM Radio", "c": 0, "g": ""}, {"n": "Regular and Complex (GNB) Radio", "c": 0, "g": ""}, {"n": "STRAIGHT 2 IT Radio", "c": 0, "g": ""}, {"n": "Solanine Radio", "c": 0, "g": ""}, {"n": "TAMAGO KAKE GOHAN Radio", "c": 0, "g": ""}, {"n": "TOBACCO N PISS Radio", "c": 0, "g": ""}]}, {"name": "Misc (too few to split out)", "soft": true, "items": [{"n": "Cleaner Radio", "c": 100, "g": "jangle pop"}, {"n": "Good to Go Radio", "c": 100, "g": "singer-songwriter"}, {"n": "La La La Radio", "c": 100, "g": "score"}, {"n": "New House Radio", "c": 100, "g": "shoegaze"}, {"n": "PANEMA Radio", "c": 100, "g": "bossa nova, jazz, brazilian jazz"}, {"n": "vice city Radio", "c": 100, "g": "emo rap"}, {"n": "Another Round Radio", "c": 86, "g": "midwest emo, emo, math rock"}, {"n": "DENIAL IS A RIVER Radio", "c": 75, "g": "nu metal, alternative metal, rap metal"}, {"n": "TIRADE Radio", "c": 67, "g": "reggaeton, trap latino, urbano latino"}, {"n": "The Mic Radio", "c": 67, "g": "slowcore, anti-folk, lo-fi indie"}, {"n": "LIQUOR STORE Radio", "c": 50, "g": "rally house, lo-fi house"}, {"n": "One Beer Radio", "c": 50, "g": "jazz fusion, jazz funk"}]}]}, {"top": "RADIO LAUNCHPAD", "sub": "Indie / Alt / Rock", "buckets": [{"name": "Shoegaze / Dream Pop", "soft": false, "items": [{"n": "Dance AM Radio", "c": 100, "g": "shoegaze, dream pop, slowcore"}, {"n": "Dayflower Radio", "c": 100, "g": "dream pop, shoegaze"}, {"n": "Ease Radio", "c": 100, "g": "shoegaze, slowcore, dream pop"}, {"n": "Sea, Swallow Me Radio", "c": 75, "g": "shoegaze, dream pop, ambient"}]}, {"name": "Rock", "soft": false, "items": [{"n": "Better in the Dark Radio", "c": 100, "g": "neo-psychedelic"}, {"n": "Let Down Radio", "c": 100, "g": "art rock, alternative rock"}, {"n": "Nangs Radio", "c": 50, "g": "neo-psychedelic, indie"}]}, {"name": "Electronic", "soft": false, "items": [{"n": "Forget Radio", "c": 100, "g": "plunderphonics"}, {"n": "No Worries Radio", "c": 100, "g": "plunderphonics"}, {"n": "Something About Us Radio", "c": 100, "g": "french house, electronic, electro"}]}, {"name": "Mixed / Low Confidence", "soft": true, "items": [{"n": "Leos Radio", "c": 40, "g": "shoegaze, j-rock, japanese indie"}, {"n": "Trust/Forget Radio", "c": 40, "g": "darkwave, post-punk, cold wave"}, {"n": "When Your Heart Says Yes - Mac DeMarco Remix Radio", "c": 25, "g": "cold wave, darkwave, synthpop"}]}, {"name": "Unclassified", "soft": true, "items": [{"n": "Always Afternoon Radio", "c": 0, "g": "future bass"}, {"n": "Buzzed Radio", "c": 0, "g": ""}, {"n": "Clocks Radio", "c": 0, "g": ""}, {"n": "Crimes Radio", "c": 0, "g": ""}, {"n": "DARE (feat. Shaun Ryder & Roses Gabor) Radio", "c": 0, "g": ""}, {"n": "Die For You Radio", "c": 0, "g": ""}, {"n": "Dirty Harry (feat. Bootie Brown) Radio", "c": 0, "g": ""}, {"n": "Dream Sweet in Sea Major Radio", "c": 0, "g": ""}, {"n": "Duvet Radio", "c": 0, "g": ""}, {"n": "Feel Better Radio", "c": 0, "g": ""}, {"n": "I'm Just a Buzzkill Radio", "c": 0, "g": ""}, {"n": "Jane! Radio", "c": 0, "g": ""}, {"n": "Just The Way You Are Radio", "c": 0, "g": ""}, {"n": "Let's Go Radio", "c": 0, "g": ""}, {"n": "Like This Radio", "c": 0, "g": ""}, {"n": "Midnight City Radio", "c": 0, "g": ""}, {"n": "Not Allowed Radio", "c": 0, "g": ""}, {"n": "Notion Radio", "c": 0, "g": ""}, {"n": "Pantyhose Radio", "c": 0, "g": ""}, {"n": "Radio Radio", "c": 0, "g": ""}, {"n": "Sign Radio", "c": 0, "g": ""}, {"n": "Telephones Radio", "c": 0, "g": ""}, {"n": "Time Machine Radio", "c": 0, "g": ""}, {"n": "Tommy Boy Radio", "c": 0, "g": ""}, {"n": "Washing Machine Heart Radio", "c": 0, "g": ""}, {"n": "recently, Radio", "c": 0, "g": ""}, {"n": "rises the moon Radio", "c": 0, "g": ""}, {"n": "telepatía Radio", "c": 0, "g": ""}]}, {"name": "Misc (too few to split out)", "soft": true, "items": [{"n": "Fictional Animals Radio", "c": 100, "g": "vaporwave, synthwave"}, {"n": "Juban District Radio", "c": 100, "g": "city pop"}, {"n": "So Easy (To Fall In Love) Radio", "c": 100, "g": "pop soul"}, {"n": "The Trouble Radio", "c": 100, "g": "hyperpop, glitch"}, {"n": "Waltz Radio", "c": 100, "g": "classical, chamber music, orchestral"}, {"n": "Yours Radio", "c": 100, "g": "latin indie, latin alternative"}, {"n": "decline Radio", "c": 100, "g": "hyperpop"}, {"n": "Nightcall Radio", "c": 67, "g": "synthwave, synthpop"}, {"n": "Humility (feat. George Benson) Radio", "c": 50, "g": "smooth jazz, yacht rock, jazz funk"}]}]}, {"top": "RADIO LAUNCHPAD", "sub": "JAPANESE ROCK", "buckets": [{"name": "Anime / J-Music / City Pop", "soft": false, "items": [{"n": "Highway Summer Radio", "c": 100, "g": "japanese indie"}, {"n": "VW '00 Radio", "c": 67, "g": "shibuya-kei, japanese indie, j-r&b"}, {"n": "Aoi, Koi, Daidaiiro No Hi Radio", "c": 50, "g": "j-rock, shoegaze, japanese indie"}, {"n": "Obsolete city of Noctiluca Radio", "c": 50, "g": "math rock, j-rock, japanese indie"}, {"n": "delusionalism Radio", "c": 50, "g": "j-rock, shoegaze, japanese indie"}]}, {"name": "Mixed / Low Confidence", "soft": true, "items": [{"n": "Disco Crimson Radio", "c": 40, "g": "shoegaze, j-rock, japanese indie"}]}, {"name": "Unclassified", "soft": true, "items": [{"n": "Be Yourself Or Die Dreaming Radio", "c": 0, "g": ""}, {"n": "House Music Radio", "c": 0, "g": ""}, {"n": "deep love Radio", "c": 0, "g": ""}, {"n": "fall semester song Radio", "c": 0, "g": "vocaloid"}, {"n": "oyasumination - MV mix Radio", "c": 0, "g": "vocaloid"}, {"n": "oyasumination Radio", "c": 0, "g": "vocaloid"}, {"n": "taste the rain Radio", "c": 0, "g": "vocaloid"}, {"n": "though I fear, I still walk Radio", "c": 0, "g": "vocaloid"}, {"n": "underneath the sun - MV mix Radio", "c": 0, "g": "vocaloid"}]}, {"name": "Misc (too few to split out)", "soft": true, "items": [{"n": "Imagine Radio", "c": 100, "g": "christmas"}, {"n": "moment Radio", "c": 100, "g": "breakcore"}, {"n": "TEENAGER Radio", "c": 60, "g": "nu metal, alternative metal, rap metal"}]}]}, {"top": "RADIO LAUNCHPAD", "sub": "JPOP / KPOP / DOUJIN", "buckets": [{"name": "Anime / J-Music / City Pop", "soft": false, "items": [{"n": "The Body of Earthling Radio", "c": 100, "g": "shibuya-kei, japanese indie"}, {"n": "ぴぽぴぽ Radio", "c": 100, "g": "shibuya-kei, japanese indie"}, {"n": "覆面調査員 - オリジナル Radio", "c": 100, "g": "shibuya-kei, japanese indie"}, {"n": "Queen of Quiet (feat. Asako Toki) Radio", "c": 71, "g": "city pop, shibuya-kei, jazz fusion"}]}, {"name": "Unclassified", "soft": true, "items": [{"n": "You Are My Music Radio", "c": 0, "g": "shibuya-kei"}]}, {"name": "Misc (too few to split out)", "soft": true, "items": [{"n": "NEWLY HUMAN FEELING Radio", "c": 100, "g": "future bass, hyperpop, vocaloid"}, {"n": "Portable Picnic Radio", "c": 100, "g": "breakcore, jungle, speedcore"}, {"n": "ナルキッソスにさよなら Radio", "c": 100, "g": "shibuya-kei, bossa nova"}]}]}, {"top": "RADIO LAUNCHPAD", "sub": "SHOEGAZE / JAP METAL", "buckets": [{"name": "Metal", "soft": false, "items": [{"n": "Heavenward Radio", "c": 50, "g": "black metal, shoegaze"}, {"n": "コバルトの降る街で Radio", "c": 50, "g": "black metal, shoegaze"}, {"n": "歌姫とそこにあれ (Live) Radio", "c": 50, "g": "black metal, shoegaze"}]}, {"name": "Mixed / Low Confidence", "soft": true, "items": [{"n": "Gyoninzaka in Spring Radio", "c": 40, "g": "shoegaze, dream pop, japanese indie"}, {"n": "Raining Room Radio", "c": 40, "g": "shoegaze, chinese indie, taiwanese indie"}, {"n": "Words In Coma Radio", "c": 40, "g": "shoegaze, chinese indie, taiwanese indie"}, {"n": "鴿哨 Radio", "c": 40, "g": "shoegaze, chinese indie, taiwanese indie"}]}, {"name": "Unclassified", "soft": true, "items": [{"n": "Chimera Radio", "c": 0, "g": ""}, {"n": "Emil Radio", "c": 0, "g": ""}, {"n": "Thunder Radio", "c": 0, "g": ""}]}, {"name": "Misc (too few to split out)", "soft": true, "items": [{"n": "Ashley Radio", "c": 100, "g": "jazz"}, {"n": "Beautiful Name Radio", "c": 100, "g": "worship, christian, pop worship"}, {"n": "Open Air Radio", "c": 100, "g": "hyperpop"}, {"n": "Sticks Radio", "c": 100, "g": "post-rock"}, {"n": "wonder if you care Radio", "c": 100, "g": "shoegaze"}, {"n": "Gaze Radio", "c": 50, "g": "neo soul, acid jazz"}]}]}, {"top": "RADIO LAUNCHPAD", "sub": "SOUNDTRACK", "buckets": [{"name": "Phonk / Trap", "soft": false, "items": [{"n": "gats - Slower Radio", "c": 100, "g": "phonk, brazilian phonk, drift phonk"}, {"n": "At Parting Radio", "c": 67, "g": "phonk, drift phonk, witch house"}, {"n": "Memory Radio", "c": 60, "g": "phonk, synthwave, drift phonk"}]}, {"name": "Anime / J-Music / City Pop", "soft": false, "items": [{"n": "A Tree-Lined Boulevard in the Wind Radio", "c": 100, "g": "anime"}, {"n": "Brothers Are Just Like that Radio", "c": 100, "g": "anime"}, {"n": "Drain Arm Radio", "c": 100, "g": "anime"}, {"n": "Explanation Radio", "c": 100, "g": "japanese vgm, shibuya-kei"}, {"n": "Haruka Radio", "c": 100, "g": "j-rock, anime, j-pop"}, {"n": "Last Evening Radio", "c": 100, "g": "anime"}, {"n": "Meteor Herd Radio", "c": 100, "g": "japanese vgm"}, {"n": "Night of Day Radio", "c": 100, "g": "japanese vgm"}, {"n": "Nova Chrysalia Radio", "c": 100, "g": "japanese vgm"}, {"n": "Theme Of Laura Radio", "c": 100, "g": "japanese vgm"}, {"n": "Utsukushiki Zankokuna Sekai (From \"Attack on Titan\") Radio", "c": 100, "g": "anime"}, {"n": "Yami no Kanata e Radio", "c": 100, "g": "anime"}, {"n": "アジサイの小径 Radio", "c": 100, "g": "japanese classical"}, {"n": "恋〜口づけまでの距離 [メインテーマ] Radio", "c": 100, "g": "anime"}, {"n": "幻想リート Radio", "c": 67, "g": "anime, soundtrack"}, {"n": "Kodoku Radio", "c": 50, "g": "japanese indie, indie jazz"}, {"n": "L no Nakama Radio", "c": 50, "g": "anime, soundtrack"}, {"n": "Save Theme Radio", "c": 50, "g": "japanese vgm, soundtrack"}, {"n": "Serenity Radio", "c": 50, "g": "japanese vgm, soundtrack"}, {"n": "Title Screen Radio", "c": 50, "g": "japanese vgm, soundtrack"}, {"n": "i'll go on loving someone else =version orchestre= Radio", "c": 50, "g": "anime, soundtrack"}, {"n": "l'homme n'est ni bete Radio", "c": 50, "g": "anime, soundtrack"}, {"n": "m & r: suite pour piano, flute basse et orchestre Radio", "c": 50, "g": "anime, soundtrack"}, {"n": "orihime's line Radio", "c": 50, "g": "anime, soundtrack"}, {"n": "tema principale: orchestra dedicata ai maestri Radio", "c": 50, "g": "anime, soundtrack"}, {"n": "theme du concerto 494 Radio", "c": 50, "g": "anime, soundtrack"}, {"n": "牙琉響也 〜LOVE LOVE GUILTY Radio", "c": 50, "g": "japanese vgm, soundtrack"}]}, {"name": "Dark / Horror / Suspense", "soft": false, "items": [{"n": "Day of Night (Alternative Version) Radio", "c": 50, "g": "dark ambient, ambient"}, {"n": "Eternal Rest Radio", "c": 50, "g": "dark ambient, ambient"}, {"n": "Halo of the Sun Radio", "c": 50, "g": "dark ambient, ambient"}]}, {"name": "Unclassified", "soft": true, "items": [{"n": "A Kindling Echo Radio", "c": 0, "g": ""}, {"n": "A Moment's Peace Radio", "c": 0, "g": ""}, {"n": "Dancing in the Rain Radio", "c": 0, "g": "musicals"}, {"n": "Extras Menu (History) [From Sonic Mega Collection] Radio", "c": 0, "g": ""}, {"n": "Fishing Hole (From \"The Legend of Zelda, Twilight Princess\") Radio", "c": 0, "g": ""}, {"n": "Gator Gambol Radio", "c": 0, "g": ""}, {"n": "Graceful Serenity Radio", "c": 0, "g": ""}, {"n": "Great Fairy Fountain (From \"Ocarina of Time\") Radio", "c": 0, "g": ""}, {"n": "Great Fairy Fountain - Angelic Version Radio", "c": 0, "g": ""}, {"n": "Great Fairy Fountain - Slower Radio", "c": 0, "g": ""}, {"n": "Hopes and Dreams Live On Radio", "c": 0, "g": ""}, {"n": "I changed, I have a new vision on life now Radio", "c": 0, "g": ""}, {"n": "In the Blind Radio", "c": 0, "g": ""}, {"n": "Issyun to Eien Radio", "c": 0, "g": ""}, {"n": "Johanna Radio", "c": 0, "g": ""}, {"n": "LILIUM MOKA Produce Mixed Chorus and Piano Radio", "c": 0, "g": ""}, {"n": "Loneliness 1A Radio", "c": 0, "g": ""}, {"n": "Lowercase Cassardis (from Dragon's Dogma) Radio", "c": 0, "g": ""}, {"n": "Moon Rock Waltz Radio", "c": 0, "g": ""}, {"n": "Neath Dark Waters (From \"Final Fantasy XIV: Shadowbringers\") Radio", "c": 0, "g": ""}, {"n": "New Bodhum Radio", "c": 0, "g": ""}, {"n": "Redwood Colonnade Radio", "c": 0, "g": ""}, {"n": "Reply Radio", "c": 0, "g": ""}, {"n": "Resilience Radio", "c": 0, "g": ""}, {"n": "Silent Hill 3 Mall Scene Radio", "c": 0, "g": ""}, {"n": "Souls of Mist Radio", "c": 0, "g": ""}, {"n": "Stargazing Radio", "c": 0, "g": ""}, {"n": "The Weight of Rain Radio", "c": 0, "g": ""}, {"n": "Wait for Me Radio", "c": 0, "g": "musicals"}, {"n": "Warm Light (Graves) Radio", "c": 0, "g": ""}, {"n": "karma Radio", "c": 0, "g": ""}, {"n": "mio Radio", "c": 0, "g": "doo-wop"}, {"n": "新たな夜明け(2012 Version) Radio", "c": 0, "g": ""}]}, {"name": "Misc (too few to split out)", "soft": true, "items": [{"n": "Before the night Radio", "c": 100, "g": "vaporwave, synthwave, chillwave"}, {"n": "Evening haze Radio", "c": 100, "g": "vaporwave"}, {"n": "Reminiscence Radio", "c": 100, "g": "new age"}, {"n": "Stars Over Lake Verity (Sinnoh Lake Theme) Radio", "c": 100, "g": "orchestral"}, {"n": "Wish Radio", "c": 100, "g": "hyperpop"}, {"n": "prettiest star Radio", "c": 100, "g": "glam rock, art rock"}, {"n": "The Pit Radio", "c": 75, "g": "progressive metal, alternative metal, progressive rock"}, {"n": "Unsung Radio", "c": 67, "g": "soundtrack, japanese vgm, shibuya-kei"}, {"n": "EINSTEIN GROOVIN' Radio", "c": 50, "g": "bebop, anime"}, {"n": "Parallel Radio", "c": 50, "g": "trip hop, downtempo"}]}]}];
+const KEY = "folder-plan-done-v1";
+
+const store = {
+  read() {
+    try { return new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); }
+    catch (e) { return new Set(); }
+  },
+  write(set) {
+    try { localStorage.setItem(KEY, JSON.stringify([...set])); } catch (e) {}
+  }
+};
+let done = store.read();
+
+const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+const main = document.getElementById("main");
+const index = document.getElementById("index");
+
+const byTop = {};
+DATA.forEach(f => (byTop[f.top] = byTop[f.top] || []).push(f));
+
+for (const [top, folders] of Object.entries(byTop)) {
+  const grp = document.createElement("div");
+  grp.className = "grp";
+  const label = document.createElement("span");
+  label.textContent = top;
+  grp.appendChild(label);
+  folders.forEach(f => {
+    const a = document.createElement("a");
+    a.href = "#" + slug(top + "-" + f.sub);
+    a.innerHTML = "<span></span><em></em>";
+    a.firstChild.textContent = f.sub;
+    a.lastChild.textContent = f.buckets.reduce((n, b) => n + b.items.length, 0);
+    grp.appendChild(a);
+  });
+  index.appendChild(grp);
+}
+
+DATA.forEach(f => {
+  const sec = document.createElement("section");
+  sec.className = "folder";
+  sec.id = slug(f.top + "-" + f.sub);
+
+  const head = document.createElement("header");
+  const top = document.createElement("div");
+  top.className = "folder-top";
+  top.textContent = f.top;
+  const h3 = document.createElement("h3");
+  h3.textContent = f.sub;
+  head.append(top, h3);
+
+  const bins = document.createElement("div");
+  bins.className = "bins";
+
+  f.buckets.forEach(b => {
+    const id = sec.id + "::" + slug(b.name);
+    const bin = document.createElement("div");
+    bin.className = "bin" + (b.soft ? " soft" : "");
+    bin.dataset.soft = b.soft ? "1" : "0";
+    bin.dataset.id = id;
+
+    const bh = document.createElement("header");
+    const h4 = document.createElement("h4");
+    h4.textContent = b.name;
+    const count = document.createElement("span");
+    count.className = "count";
+    count.textContent = b.items.length;
+    const check = document.createElement("label");
+    check.className = "check";
+    check.title = "Mark this subfolder as created";
+    const box = document.createElement("input");
+    box.type = "checkbox";
+    box.checked = done.has(id);
+    box.addEventListener("change", () => {
+      box.checked ? done.add(id) : done.delete(id);
+      store.write(done);
+      bin.classList.toggle("done", box.checked);
+      apply();
+    });
+    check.appendChild(box);
+    bh.append(h4, count, check);
+    if (box.checked) bin.classList.add("done");
+
+    const ul = document.createElement("ul");
+    ul.className = "chips";
+    b.items.forEach(it => {
+      const li = document.createElement("li");
+      li.textContent = it.n;
+      li.dataset.name = it.n.toLowerCase();
+      if (it.g) li.title = it.g;
+      const pct = document.createElement("i");
+      pct.textContent = it.c + "%";
+      li.appendChild(pct);
+      ul.appendChild(li);
+    });
+
+    bin.append(bh, ul);
+    bins.appendChild(bin);
+  });
+
+  sec.append(head, bins);
+  main.appendChild(sec);
+});
+
+const q = document.getElementById("q");
+const hideSoft = document.getElementById("hideSoft");
+const hideDone = document.getElementById("hideDone");
+
+function apply() {
+  const term = q.value.trim().toLowerCase();
+  document.querySelectorAll("section.folder").forEach(sec => {
+    let shown = 0;
+    sec.querySelectorAll(".bin").forEach(bin => {
+      let hits = 0;
+      bin.querySelectorAll("ul.chips li").forEach(li => {
+        const hit = term && li.dataset.name.includes(term);
+        li.classList.toggle("hit", !!hit);
+        if (hit) hits++;
+      });
+      let hide = false;
+      if (hideSoft.checked && bin.dataset.soft === "1") hide = true;
+      if (hideDone.checked && bin.classList.contains("done")) hide = true;
+      if (term && hits === 0) hide = true;
+      bin.hidden = hide;
+      if (!hide) shown++;
+    });
+    sec.hidden = shown === 0;
+  });
+}
+
+q.addEventListener("input", apply);
+hideSoft.addEventListener("change", apply);
+hideDone.addEventListener("change", apply);
+document.getElementById("reset").addEventListener("click", () => {
+  done = new Set();
+  store.write(done);
+  document.querySelectorAll(".bin input[type=checkbox]").forEach(b => (b.checked = false));
+  document.querySelectorAll(".bin").forEach(b => b.classList.remove("done"));
+  apply();
+});
+apply();
+</script>
