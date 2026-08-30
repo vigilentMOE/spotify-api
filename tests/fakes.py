@@ -20,6 +20,8 @@ class FakeSpotify:
         # "Made for you" mixes, which are not readable via the Web API.
         self._unreadable = set(unreadable_playlists or [])
         self.artists_calls: List[List[str]] = []  # batch-size assertions
+        # query -> raw search response, for seed-track lookups
+        self.search_results: Dict[str, Dict] = {}
 
     def current_user(self) -> Dict:
         return {"id": "testuser", "display_name": "Test User"}
@@ -34,6 +36,9 @@ class FakeSpotify:
             raise SpotifyException(404, -1, "Resource not found")
         items = self._tracks.get(playlist_id, [])[offset:offset + limit]
         return {"items": items}
+
+    def search(self, q: str, type: str, limit: int) -> Dict:
+        return self.search_results.get(q, {"tracks": {"items": []}})
 
     def artists(self, ids: List[str]) -> Dict:
         self.artists_calls.append(list(ids))
