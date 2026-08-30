@@ -78,3 +78,105 @@ def test_fetch_artist_genres_batches_and_dedupes():
     assert result == artists
     assert all(len(call) <= 50 for call in sp.artists_calls)  # ARTIST_BATCH
     assert sum(len(call) for call in sp.artists_calls) == 60
+
+
+def test_normalize_name_collapses_case_and_whitespace():
+    assert playlist_snapshot.normalize_name("  Dark   Moody Mix ") == (
+        playlist_snapshot.normalize_name("dark moody mix")
+    )
+
+
+def test_select_playlists_matches_names_and_tags_folder():
+    playlists = [
+        {"id": "p1", "name": "Dark Moody Mix"},
+        {"id": "p2", "name": "Horrorcore Mix"},
+        {"id": "p3", "name": "Unrelated Playlist"},
+    ]
+    folder_map = {"NICHE MIXES": ["dark moody mix"], "RADIO LAUNCHPAD": ["Horrorcore Mix"]}
+    selected, unmatched = playlist_snapshot.select_playlists(playlists, folder_map)
+    assert unmatched == []
+    assert [(p["id"], p["source_folder"]) for p in selected] == [
+        ("p1", "NICHE MIXES"),
+        ("p2", "RADIO LAUNCHPAD"),
+    ]
+
+
+def test_select_playlists_prefix_matches_truncated_name():
+    # Screenshot labels are truncated ("Dungeon Synth ..."), so a trailing
+    # ellipsis must still resolve to the real playlist.
+    playlists = [{"id": "p1", "name": "Dungeon Synth Mix"}]
+    selected, unmatched = playlist_snapshot.select_playlists(
+        playlists, {"NICHE MIXES": ["Dungeon Synth ..."]}
+    )
+    assert unmatched == []
+    assert selected[0]["id"] == "p1"
+
+
+def test_select_playlists_reports_unmatched_names():
+    playlists = [{"id": "p1", "name": "Dark Moody Mix"}]
+    selected, unmatched = playlist_snapshot.select_playlists(
+        playlists, {"NICHE MIXES": ["Nonexistent Mix"]}
+    )
+    assert selected == []
+    assert unmatched == ["NICHE MIXES: Nonexistent Mix"]
+
+
+def test_select_playlists_does_not_duplicate_a_playlist():
+    playlists = [{"id": "p1", "name": "Dark Moody Mix"}]
+    selected, _ = playlist_snapshot.select_playlists(
+        playlists, {"A": ["Dark Moody Mix"], "B": ["Dark Moody Mix"]}
+    )
+    assert len(selected) == 1
+    assert selected[0]["source_folder"] == "A"  # first folder wins
+
+
+def test_build_snapshot_aggregates_each_playlist():
+    playlists = [
+        {"id": "pl0", "name": "Rock Mix", "tracks": {"total": 2}},
+        {"id": "pl1", "name": "Empty", "tracks": {"total": 0}},
+    ]
+    tracks = {
+        "pl0": [_track_item(["a1"]), _track_item(["a2"])],
+        "pl1": [],
+    }
+    artists = {"a1": ["rock"], "a2": ["rock", "pop"]}
+    sp = FakeSpotify(
+        playlists=playlists, tracks_by_playlist=tracks, artists_by_id=artists
+    )
+
+    snapshot = playlist_snapshot.build_snapshot(sp)
+
+    assert snapshot["user_id"] == "testuser"
+    assert "generated_at" in snapshot
+    assert len(snapshot["playlists"]) == 2
+    rock_mix = snapshot["playlists"][0]
+    assert rock_mix == {
+        "id": "pl0",
+        "name": "Rock Mix",
+        "source_folder": None,
+        "total_tracks": 2,
+        "tracks_with_artists": 2,
+        "genre_counts": {"rock": 2, "pop": 1},
+    }
+    assert snapshot["playlists"][1]["genre_counts"] == {}
+
+
+def test_build_snapshot_restricts_to_folder_map():
+    playlists = [
+        {"id": "pl0", "name": "Rock Mix", "tracks": {"total": 1}},
+        {"id": "pl1", "name": "Other Mix", "tracks": {"total": 1}},
+    ]
+    tracks = {"pl0": [_track_item(["a1"])], "pl1": [_track_item(["a2"])]}
+    sp = FakeSpotify(
+        playlists=playlists,
+        tracks_by_playlist=tracks,
+        artists_by_id={"a1": ["rock"], "a2": ["pop"]},
+    )
+
+    snapshot = playlist_snapshot.build_snapshot(
+        sp, folder_map={"NICHE MIXES": ["Rock Mix"]}
+    )
+
+    assert [p["id"] for p in snapshot["playlists"]] == ["pl0"]
+    assert snapshot["playlists"][0]["source_folder"] == "NICHE MIXES"
+    assert snapshot["unmatched_names"] == []
