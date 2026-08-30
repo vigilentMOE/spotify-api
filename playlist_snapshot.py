@@ -5,6 +5,10 @@ that propose_folders.py consumes, so the API-heavy aggregation runs once.
 """
 from typing import Dict, Iterator, List, Sequence
 
+from spotipy.exceptions import SpotifyException
+
+from spotify_common import log
+
 # Reading the user's own playlists needs scopes beyond what
 # create-playlist.py requests, so the first run re-authorizes.
 SCOPE = "playlist-read-private playlist-read-collaborative"
@@ -36,3 +40,65 @@ def aggregate_genres(
         for genre in genres:
             counts[genre] = counts.get(genre, 0) + 1
     return counts
+
+
+def fetch_all_playlists(sp) -> List[Dict]:
+    """All playlists in the user's library (owned and followed)."""
+    playlists: List[Dict] = []
+    offset = 0
+    while True:
+        page = sp.current_user_playlists(limit=PLAYLIST_PAGE, offset=offset)
+        items = [p for p in page.get("items", []) if p]
+        playlists.extend(items)
+        if len(items) < PLAYLIST_PAGE:
+            break  # short page means last page
+        offset += PLAYLIST_PAGE
+    return playlists
+
+
+def fetch_track_artist_ids(sp, playlist_id: str) -> List[List[str]]:
+    """Per-track lists of artist IDs for one playlist.
+
+    Local files and removed tracks have no artist IDs and are skipped.
+    The `fields` filter keeps the payload small.
+
+    Spotify's algorithmic "Made for you" mixes (Daily Mix, genre mixes, etc.)
+    are not readable through the Web API and answer 404. Treat those as
+    empty rather than aborting the whole snapshot.
+    """
+    tracks: List[List[str]] = []
+    offset = 0
+    fields = "items(track(artists(id)))"
+    while True:
+        try:
+            page = sp.playlist_items(
+                playlist_id, fields=fields, limit=TRACK_PAGE, offset=offset
+            )
+        except SpotifyException as exc:
+            if exc.http_status in (403, 404):
+                log(f"  ! playlist {playlist_id} is not readable via the API "
+                    f"({exc.http_status}); skipping")
+                return []
+            raise
+        items = page.get("items", [])
+        for item in items:
+            track = item.get("track") or {}
+            ids = [a["id"] for a in track.get("artists", []) if a.get("id")]
+            if ids:
+                tracks.append(ids)
+        if len(items) < TRACK_PAGE:
+            break
+        offset += TRACK_PAGE
+    return tracks
+
+
+def fetch_artist_genres(sp, artist_ids: Sequence[str]) -> Dict[str, List[str]]:
+    """Batched artist-ID -> genre-list map (sp.artists caps at 50 IDs)."""
+    genres: Dict[str, List[str]] = {}
+    unique = sorted(set(artist_ids))
+    for batch in chunked(unique, ARTIST_BATCH):
+        resp = sp.artists(list(batch))
+        for artist in resp.get("artists", []):
+            if artist:  # Spotify returns null for invalid IDs
+                genres[artist["id"]] = artist.get("genres", [])
+    return genres
