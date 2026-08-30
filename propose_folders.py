@@ -21,6 +21,7 @@ from typing import Dict, List, Optional, Tuple
 from spotify_common import log
 
 GENRE_FAMILIES: List[Tuple[str, Tuple[str, ...]]] = [
+    ("Slowed / Reverb", ("slowed", "reverb", "sped up", "super slow")),
     ("Vaporwave / Synthwave", (
         "vaporwave", "synthwave", "retrowave", "chillwave", "mallsoft",
         "future funk", "vaportrap", "trillwave", "cyberpunk",
@@ -42,9 +43,6 @@ GENRE_FAMILIES: List[Tuple[str, Tuple[str, ...]]] = [
         "punk", "hardcore", "emo", "screamo", "ska", "angst",
     )),
     ("Shoegaze / Dream Pop", ("shoegaze", "dream pop", "dreamo")),
-    ("Rock", (
-        "rock", "grunge", "britpop", "psychedelic", "bubblegrunge",
-    )),
     ("Anime / J-Music / City Pop", (
         "anime", "otacore", "j-rock", "j-pop", "jpop", "city pop", "doujin",
         "japanese", "korean", "k-pop", "kpop", "cowboy bebop",
@@ -52,11 +50,15 @@ GENRE_FAMILIES: List[Tuple[str, Tuple[str, ...]]] = [
     ("Hip-Hop / Rap", (
         "hip hop", "hip-hop", "rap", "drill", "grime", "boom bap",
     )),
+    # Before Rock so 'Indie Soul' and 'Indie R&B' keep their real genre.
     ("R&B / Soul / Funk", (
         "r&b", "soul", "funk", "motown", "new jack swing",
     )),
     ("Jazz / Blues", (
         "jazz", "bebop", "bossa nova", "swing", "big band", "blues",
+    )),
+    ("Rock", (
+        "rock", "grunge", "britpop", "psychedelic", "bubblegrunge",
     )),
     ("Electronic", (
         "electronic", "edm", "house", "techno", "trance", "dubstep",
@@ -79,17 +81,64 @@ GENRE_FAMILIES: List[Tuple[str, Tuple[str, ...]]] = [
         "latin", "reggaeton", "salsa", "bachata", "corrido", "cumbia",
         "mariachi", "brazilian",
     )),
+    # Mood and activity families. Ranked below every genre family, so a name
+    # carrying a real genre ('Chill Jazz Mix') is filed by genre and only
+    # mood-only names ('Bed Rotting Mix') land here. Many of this library's
+    # playlists are named for a mood or an activity, not a genre.
+    ("Workout / Hype", (
+        "workout", "running", "hype", "gym", "weightlifting", "adrenaline",
+        "pump up", "aggressive", "angry", "motivation", "energetic", "energy",
+        "intense", "fast", "amped", "grind time",
+    )),
+    ("Focus / Study", (
+        "focus", "study", "homework", "concentration", "productivity",
+        "creative", "work",
+    )),
+    ("Romantic / Love", (
+        "romantic", "love", "intimate", "relationship", "yearning", "cozy",
+        "crush",
+    )),
+    ("Dark / Horror / Suspense", (
+        "horror", "eerie", "spooky", "suspense", "dark", "gloomy",
+        "apocalyptic", "vampire", "lovecraftian", "dungeon synth",
+        "mysterious", "dread", "creepy", "sinister", "fantasy",
+    )),
+    ("Sad / Melancholy", (
+        "sad", "melancholy", "crying", "lonely", "moody", "dissociation",
+        "escapism", "bed rotting", "angst", "somber", "heartbreak",
+        "depress", "tortured",
+    )),
+    ("Feel Good / Uplifting", (
+        "feel good", "good vibes", "happy", "hopecore", "uplifting",
+        "comforting", "groovy", "fun", "wholesome",
+    )),
+    ("Morning / Daytime", (
+        "morning", "wake up", "breakfast", "sunday", "afternoon", "daytime",
+        "coffee",
+    )),
+    ("Night / Late Night", ("night", "midnight", "evening", "nocturne")),
+    ("Chores / Everyday", (
+        "cooking", "baking", "walking", "driving", "cleaning", "elevator",
+        "commute", "shower", "chores",
+    )),
+    ("Seasonal / Holiday", (
+        "christmas", "halloween", "summer", "winter", "autumn", "spring",
+        "holiday",
+    )),
     ("Ambient / Chill", (
         "ambient", "chill", "calm", "sleep", "meditation", "new age",
-        "downtempo", "quiet", "peaceful", "liminal", "drone", "somber",
-        "gentle", "soft", "relaxing", "background",
+        "downtempo", "quiet", "peaceful", "liminal", "drone", "atmospheric",
+        "gentle", "soft", "relaxing", "background", "mellow", "serenity",
     )),
     # Broadest last: many micro-genres end in 'pop' ('art pop', 'indie pop').
     ("Pop", ("pop", "boy band", "girl group", "idol")),
+    # After Pop so 'indie pop' files as Pop; catches bare 'indie'/'alt' names.
+    ("Indie / Alternative", ("indie", "alternative")),
 ]
 
 MIXED_FOLDER = "Mixed / Low Confidence"
 UNKNOWN_FOLDER = "Unclassified"
+MISC_FOLDER = "Misc (too few to split out)"
 
 
 def classify_genre(genre: str) -> Optional[str]:
@@ -122,12 +171,14 @@ NO_FOLDER = "(no folder)"
 
 
 def propose(
-    snapshot: Dict, min_coverage: float = 0.5
+    snapshot: Dict, min_coverage: float = 0.5, min_size: int = 1
 ) -> Dict[str, Dict[str, List[Dict]]]:
     """Group playlists by source folder, then by dominant genre family.
 
     The result is the proposed structure: one subfolder per genre family
-    inside each existing top-level folder.
+    inside each existing top-level folder. Families with fewer than
+    `min_size` playlists are folded into a single Misc bucket, since a
+    subfolder holding one playlist isn't worth creating.
     """
     family_order = [name for name, _ in GENRE_FAMILIES]
     bucket_order = family_order + [MIXED_FOLDER, UNKNOWN_FOLDER]
@@ -160,12 +211,26 @@ def propose(
     ordered: Dict[str, Dict[str, List[Dict]]] = {}
     for source in sorted(groups):
         buckets = groups[source]
-        ordered[source] = {}
+        misc: List[Dict] = []
+        kept: Dict[str, List[Dict]] = {}
         for bucket in bucket_order:
-            if bucket in buckets:
-                ordered[source][bucket] = sorted(
-                    buckets[bucket], key=lambda e: (-e["coverage"], e["name"])
-                )
+            entries = buckets.get(bucket)
+            if not entries:
+                continue
+            # Mixed and Unclassified are already catch-alls; never fold them.
+            if len(entries) < min_size and bucket not in (
+                MIXED_FOLDER, UNKNOWN_FOLDER
+            ):
+                misc.extend(entries)
+            else:
+                kept[bucket] = entries
+        if misc:
+            kept[MISC_FOLDER] = misc
+
+        ordered[source] = {
+            bucket: sorted(entries, key=lambda e: (-e["coverage"], e["name"]))
+            for bucket, entries in kept.items()
+        }
     return ordered
 
 
@@ -212,6 +277,11 @@ def main() -> None:
         help="snapshot file from playlist_snapshot.py (default: snapshot.json)",
     )
     parser.add_argument(
+        "--min-size", type=int, default=3,
+        help="fold families with fewer than this many playlists into Misc "
+             "(default: 3; use 1 to keep every family)",
+    )
+    parser.add_argument(
         "--min-coverage", type=float, default=0.5,
         help="dominant-family share below which a playlist is Mixed "
              "(default: 0.5)",
@@ -226,7 +296,9 @@ def main() -> None:
             f"{args.snapshot} not found - run 'python playlist_snapshot.py' first."
         )
 
-    groups = propose(snapshot, min_coverage=args.min_coverage)
+    groups = propose(
+        snapshot, min_coverage=args.min_coverage, min_size=args.min_size
+    )
     log(f"Grouped {len(snapshot['playlists'])} playlists into "
         f"{sum(len(b) for b in groups.values())} proposed subfolder(s).")
     print(render_report(groups, snapshot.get("generated_at", "unknown")))

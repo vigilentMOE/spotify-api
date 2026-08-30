@@ -26,7 +26,10 @@ from spotipy.exceptions import SpotifyException
 from propose_folders import classify_genre
 from spotify_common import build_user_client, log
 
-SCOPE = "playlist-read-private"
+# Search and artist lookups need no user scope, but reusing the scope
+# playlist_snapshot.py requests keeps the cached token valid, so this
+# script never triggers a second browser authorization.
+SCOPE = "playlist-read-private playlist-read-collaborative"
 RADIO_SUFFIX = " Radio"
 
 

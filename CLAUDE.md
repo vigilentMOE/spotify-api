@@ -15,9 +15,16 @@ pip install -r requirements.txt
 python search-authors.py           # interactive: search artists by name -> artist IDs
 python get-artist-genre.py         # interactive: artist ID -> genre list
 python create-playlist.py <stats.fm profile URL or username> [--limit N] [--range weeks|months|lifetime] [--name X] [--public] [--dry-run]
+
+python playlist_snapshot.py [--folders folders.json] [--folder NAME] [--output snapshot.json]
+python folder_inventory.py [--inventory folder_inventory.json] [--no-api]
+python propose_folders.py [--snapshot snapshot.json] [--min-size 3] [--min-coverage 0.5]
+
+pytest                             # full suite
+pytest tests/test_propose_folders.py::test_classify_genre_matches_keyword_substring -v
 ```
 
-There is no configured linter or test runner. `mypy` has been used ad hoc (`.mypy_cache` is present); scripts carry type hints, so keep new code typed.
+`pytest` is the test runner; tests use in-memory fakes (`tests/fakes.py`) and never hit the network. `mypy` has been used ad hoc (`.mypy_cache` is present); code carries type hints, so keep new code typed.
 
 ## Architecture
 
@@ -37,16 +44,28 @@ Conventions established by `create-playlist.py` (follow these in new scripts):
 
 Script filenames use hyphens, so they cannot be imported as modules. If future work needs shared code (auth helpers, genre aggregation), extract it into an underscore-named module (e.g. `spotify_common.py`) rather than importing across hyphenated scripts.
 
-## Planned direction: organizing playlists by aggregated metadata
+## Playlist folder sorting
 
-The next body of work is sorting/organizing the user's many playlists (currently spread across playlist folders) more granularly, based on aggregated per-playlist track metadata — primarily genre.
+Implemented across three importable modules plus a shared helper:
 
-Key Spotify API constraints that shape this work (verify against current docs before building, but true as of mid-2026):
+- `spotify_common.py` — `log`, `require_env`, `build_user_client(scope)`.
+- `playlist_snapshot.py` — reads the API: pages all playlists, fetches each one's tracks, batch-fetches artist genres, writes `snapshot.json`. `--folders`/`--folder` restrict it to a hand-built folder map (with prefix fallback for names transcribed from truncated UI labels).
+- `folder_inventory.py` — the fallback source for playlists the API can't see (below). Emits the same snapshot shape.
+- `propose_folders.py` — pure local analysis. Folds genre strings into ordered families (`GENRE_FAMILIES`, first match wins, specific before broad), groups playlists by source folder then dominant family, and renders a markdown report.
+
+`snapshot.json`, `folders.json`, and `folder_inventory.json` are gitignored personal data.
+
+**The hard constraint discovered in practice:** Spotify's personalised `"<Genre> Mix"` and `"<Song> Radio"` playlists are completely invisible to the Web API. They do not appear in `current_user_playlists` (verified: 149 playlists visible against a library containing hundreds of them) and cannot be found via `search`, so their tracks are unreadable. Genre for those comes from `folder_inventory.py` instead: the name itself for `"<Genre> Mix"`, and a seed-track search plus artist-genre lookup for `"<Song> Radio"`.
+
+`GENRE_FAMILIES` has two tiers: genre families first, then mood/activity families (Workout, Focus, Sad, Night, …), so a name carrying a real genre files by genre and only mood-only names fall through. Tune the taxonomy by adding keywords with a matching test — don't restructure the pipeline.
+
+Key Spotify API constraints (verify against current docs before building, but true as of mid-2026):
 
 - **Playlist folders are invisible to the Web API.** There is no endpoint to list, create, or move playlist folders — folders exist only in the Spotify clients. Practical consequence: a script can read/analyze/rename playlists and reorder tracks, and can emit a *recommended* folder organization, but the user must apply folder moves manually in the Spotify app (or via unofficial means, which this repo does not use).
 - **Genre is not a track attribute.** Genres live on *artists* (and sometimes albums). Aggregating a playlist's genre means: fetch playlist tracks → collect artist IDs → batch-fetch artists (`spotify.artists()` accepts up to 50 IDs per call) → tally genre frequencies. `get-artist-genre.py` is the single-artist prototype of this.
 - **Audio features endpoints are deprecated** (`audio-features`, `audio-analysis`, recommendations, related-artists — restricted for apps since Nov 2024). Do not plan aggregation around danceability/energy/tempo from Spotify; genre + artist popularity + release dates are the reliable metadata.
 - Reading the user's own playlists requires OAuth with `playlist-read-private` (and `playlist-read-collaborative` if applicable) — scopes beyond what `create-playlist.py` currently requests, so expect a re-authorization when first adding these.
 - Playlist track listings paginate at 100 items (`spotify.playlist_items` with `offset`), and `current_user_playlists` paginates at 50.
+- A playlist that 404s or 403s on `playlist_items` is skipped rather than aborting the run — algorithmic playlists behave this way.
 
-A sensible shape for this feature: one script/module that snapshots all user playlists with aggregated genre profiles (cache the results locally — full aggregation is API-call heavy), and a separate step that proposes groupings from that snapshot. Keep analysis (read-only) separated from any mutation, and offer `--dry-run` on anything that writes, following `create-playlist.py`'s pattern.
+Keep analysis (read-only) separated from any mutation, and offer `--dry-run` on anything that writes, following `create-playlist.py`'s pattern.

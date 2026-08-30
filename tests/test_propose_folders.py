@@ -99,3 +99,25 @@ def test_render_report_contains_folders_and_playlists():
     assert "Heavy Stuff" in report
     assert "90%" in report
     assert "death metal" in report
+
+
+def test_propose_folds_small_buckets_into_misc():
+    # A one-playlist subfolder is not worth creating; min_size merges it.
+    snapshot = _snapshot([
+        _pl("p1", "A", {"death metal": 5}),
+        _pl("p2", "B", {"death metal": 5}),
+        _pl("p3", "C", {"death metal": 5}),
+        _pl("p4", "D", {"bossa nova": 5}),
+    ])
+    groups = propose_folders.propose(snapshot, min_size=3)
+    assert list(groups["NICHE MIXES"]) == ["Metal", propose_folders.MISC_FOLDER]
+    assert [e["name"] for e in groups["NICHE MIXES"][propose_folders.MISC_FOLDER]] == ["D"]
+
+
+def test_propose_min_size_one_keeps_every_bucket():
+    snapshot = _snapshot([
+        _pl("p1", "A", {"death metal": 5}),
+        _pl("p2", "D", {"bossa nova": 5}),
+    ])
+    groups = propose_folders.propose(snapshot, min_size=1)
+    assert list(groups["NICHE MIXES"]) == ["Metal", "Jazz / Blues"]

@@ -152,3 +152,50 @@ Notes: only public profiles work (stats.fm lets users hide top tracks); tracks
 in the stats.fm catalog with no Spotify match are skipped, so the script
 over-fetches to still reach your requested count. The created playlist's URL is
 printed to stdout on success.
+### Sort playlist folders by genre
+
+Two steps: build a snapshot with per-playlist genre data, then generate a
+proposed folder organization from it.
+
+**Important:** the Spotify Web API cannot see, create, or move playlist
+folders — folders exist only in the Spotify clients. The output is a report
+you apply by hand in the app.
+
+For your own playlists, snapshot straight from the API:
+
+```sh
+# Whole library:
+python playlist_snapshot.py
+
+# Or restrict to named folders (folders.json maps folder -> playlist names):
+python playlist_snapshot.py --folders folders.json --folder "NICHE MIXES"
+```
+
+Spotify's personalised **"<Genre> Mix"** and **"<Song> Radio"** playlists are
+invisible to the Web API — they never appear in `current_user_playlists` and
+can't be found by search, so their tracks can't be read. For those, transcribe
+the folder contents into `folder_inventory.json` and classify them without
+reading tracks:
+
+```sh
+# '<Genre> Mix' -> genre from the name; '<Song> Radio' -> genre of the seed
+# track's artists, looked up via search.
+python folder_inventory.py --inventory folder_inventory.json
+
+# Name-only, no Spotify calls at all:
+python folder_inventory.py --no-api
+```
+
+Either way, the snapshot feeds the same report generator:
+
+```sh
+python propose_folders.py --min-size 3 > PROPOSED_FOLDERS.md
+```
+
+| Flag | Default | Description |
+| --- | --- | --- |
+| `--snapshot` | `snapshot.json` | Snapshot file to read |
+| `--min-size` | `3` | Families smaller than this fold into one Misc bucket |
+| `--min-coverage` | `0.5` | Dominant-family share below which a playlist is "Mixed" |
+
+Run the tests with `pytest`.
