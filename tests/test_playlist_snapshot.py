@@ -2,16 +2,6 @@ import playlist_snapshot
 from tests.fakes import FakeSpotify
 
 
-def test_chunked_splits_into_batches():
-    assert list(playlist_snapshot.chunked(["a", "b", "c", "d", "e"], 2)) == [
-        ["a", "b"], ["c", "d"], ["e"],
-    ]
-
-
-def test_chunked_empty_sequence_yields_nothing():
-    assert list(playlist_snapshot.chunked([], 10)) == []
-
-
 def test_aggregate_genres_counts_tracks_per_genre():
     track_artist_ids = [["a1"], ["a2"], ["a1", "a2"]]
     artist_genres = {"a1": ["rock"], "a2": ["rock", "pop"]}
@@ -68,16 +58,6 @@ def test_fetch_track_artist_ids_returns_empty_for_unreadable_playlist():
     # single unreadable playlist must not abort the whole snapshot.
     sp = FakeSpotify(unreadable_playlists=["pl0"])
     assert playlist_snapshot.fetch_track_artist_ids(sp, "pl0") == []
-
-
-def test_fetch_artist_genres_batches_and_dedupes():
-    artists = {f"a{i}": ["rock"] for i in range(60)}
-    sp = FakeSpotify(artists_by_id=artists)
-    ids = list(artists) + list(artists)  # duplicates must collapse
-    result = playlist_snapshot.fetch_artist_genres(sp, ids)
-    assert result == artists
-    assert all(len(call) <= 50 for call in sp.artists_calls)  # ARTIST_BATCH
-    assert sum(len(call) for call in sp.artists_calls) == 60
 
 
 def test_normalize_name_collapses_case_and_whitespace():

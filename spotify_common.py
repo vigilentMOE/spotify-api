@@ -6,11 +6,14 @@ so any logic shared between scripts lives here instead.
 from dotenv import load_dotenv
 import os
 import sys
+from typing import Dict, Iterator, List, Sequence
 
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
 load_dotenv()
+
+ARTIST_BATCH = 50  # Spotify cap for sp.artists()
 
 # Must exactly match a Redirect URI registered in the Spotify app dashboard.
 # Spotify requires the loopback IP literal (127.0.0.1), not 'localhost'.
@@ -42,3 +45,20 @@ def build_user_client(scope: str) -> spotipy.Spotify:
         scope=scope,
     )
     return spotipy.Spotify(auth_manager=auth)
+
+
+def chunked(seq: Sequence, size: int) -> Iterator[Sequence]:
+    for start in range(0, len(seq), size):
+        yield seq[start:start + size]
+
+
+def fetch_artist_genres(sp, artist_ids: Sequence[str]) -> Dict[str, List[str]]:
+    """Batched artist-ID -> genre-list map (sp.artists caps at 50 IDs)."""
+    genres: Dict[str, List[str]] = {}
+    unique = sorted(set(artist_ids))
+    for batch in chunked(unique, ARTIST_BATCH):
+        resp = sp.artists(list(batch))
+        for artist in resp.get("artists", []):
+            if artist:  # Spotify returns null for invalid IDs
+                genres[artist["id"]] = artist.get("genres", [])
+    return genres

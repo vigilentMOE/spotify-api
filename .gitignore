@@ -6,3 +6,4 @@ snapshot.json
 __pycache__/
 .DS_Store
 folders.json
+liked_songs.txt

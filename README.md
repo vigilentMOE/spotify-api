@@ -7,6 +7,7 @@ This project provides tools to interact with the Spotify API, allowing users to 
 - **Search Artists**: Search for artists by name and display their details (such as artist ID) in a tabulated format.
 - **Get Artist Genres**: Retrieve and display the genres associated with a specific artist. Requires artist ID
 - **Create Playlist from stats.fm**: Read a public [stats.fm](https://stats.fm) profile and build a Spotify playlist of that user's top tracks in *your* account.
+- **List Liked Songs**: Dump your entire Liked Songs library to a fixed-width table — one aligned row per track, with genre tags — readable by you and by an LLM.
 
 ## Requirements
 
@@ -152,6 +153,46 @@ Notes: only public profiles work (stats.fm lets users hide top tracks); tracks
 in the stats.fm catalog with no Spotify match are skipped, so the script
 over-fetches to still reach your requested count. The created playlist's URL is
 printed to stdout on success.
+### List Liked Songs
+
+Dumps every track in your **Liked Songs** to a fixed-width table: one row per
+track, columns aligned so the file scans vertically in a full-screen text view.
+Rows land under ~190 characters.
+
+```sh
+# Straight to the terminal (or a pipe):
+python liked_songs.py
+
+# To a file, which prints only the path on stdout:
+python liked_songs.py --output liked_songs.txt
+
+# A quick look at your 20 most recent likes, all genres shown:
+python liked_songs.py --limit 20 --max-genres 0
+```
+
+```text
+# Liked Songs — 1847 tracks — generated 2026-09-12T12:21Z
+# genres are artist-level (Spotify has no track genre); ADDED is when you liked it
+ADDED       TRACK                               ARTIST                    ALBUM                           YEAR  LEN    POP  ID                      GENRES
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+2024-03-11  Runaway                             Kanye West                My Beautiful Dark Twisted Fan…  2010  9:08   78   4Ye8jGrfoshkKZUM6s2Sa4  hip hop; rap; chicago rap
+2019-07-02  Weightless                          Marconi Union             Weightless                      2012  8:10   41   2ZlKh1kMJptDvbPWNK5Y5V  ambient; drone; sleep
+2021-12-25  Black Hole Sun                      Soundgarden               Superunknown                    1994  5:20   72   2EoOZnxNgtmZaD8uUmz2nD  grunge; alternative metal; rock
+```
+
+| Flag | Default | Description |
+| --- | --- | --- |
+| `--output` | *(stdout)* | Write the table to this file and print only the path |
+| `--limit` | *(all)* | Only the N most recently liked tracks |
+| `--max-genres` | `4` | Genres per row; `0` shows every one |
+
+Notes: **GENRES is artist-level** — Spotify has no track genre, so a track's
+tags are the union of its artists' genres, deduped, primary artist first.
+Fields too long for their column are cut with `…`; the untruncated values are
+still in Spotify. Local files and tracks pulled from the catalogue show `-`
+for whatever metadata is missing. This is the first script to need the
+`user-library-read` scope, so the first run re-opens the browser to authorize.
+
 ### Sort playlist folders by genre
 
 Two steps: build a snapshot with per-playlist genre data, then generate a

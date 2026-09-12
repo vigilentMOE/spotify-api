@@ -6,23 +6,17 @@ that propose_folders.py consumes, so the API-heavy aggregation runs once.
 import argparse
 import json
 from datetime import datetime, timezone
-from typing import Dict, Iterator, List, Optional, Sequence, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from spotipy.exceptions import SpotifyException
 
-from spotify_common import build_user_client, log
+from spotify_common import build_user_client, fetch_artist_genres, log
 
 # Reading the user's own playlists needs scopes beyond what
 # create-playlist.py requests, so the first run re-authorizes.
 SCOPE = "playlist-read-private playlist-read-collaborative"
 PLAYLIST_PAGE = 50   # Spotify page cap for current_user_playlists
 TRACK_PAGE = 100     # Spotify page cap for playlist_items
-ARTIST_BATCH = 50    # Spotify cap for sp.artists()
-
-
-def chunked(seq: Sequence, size: int) -> Iterator[Sequence]:
-    for start in range(0, len(seq), size):
-        yield seq[start:start + size]
 
 
 def aggregate_genres(
@@ -93,18 +87,6 @@ def fetch_track_artist_ids(sp, playlist_id: str) -> List[List[str]]:
             break
         offset += TRACK_PAGE
     return tracks
-
-
-def fetch_artist_genres(sp, artist_ids: Sequence[str]) -> Dict[str, List[str]]:
-    """Batched artist-ID -> genre-list map (sp.artists caps at 50 IDs)."""
-    genres: Dict[str, List[str]] = {}
-    unique = sorted(set(artist_ids))
-    for batch in chunked(unique, ARTIST_BATCH):
-        resp = sp.artists(list(batch))
-        for artist in resp.get("artists", []):
-            if artist:  # Spotify returns null for invalid IDs
-                genres[artist["id"]] = artist.get("genres", [])
-    return genres
 
 
 def normalize_name(name: str) -> str:
