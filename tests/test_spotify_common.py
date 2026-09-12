@@ -48,3 +48,21 @@ def test_fetch_artist_genres_batches_and_dedupes():
         len(call) <= spotify_common.ARTIST_BATCH for call in sp.artists_calls
     )
     assert sum(len(call) for call in sp.artists_calls) == 60
+
+
+def test_build_public_client_uses_client_credentials_not_oauth(monkeypatch):
+    # Catalogue search needs no user context: no browser, no scopes, and
+    # the OAuth token cache in .cache must stay untouched.
+    from spotipy.oauth2 import SpotifyClientCredentials
+
+    monkeypatch.setenv("SPOTIFY_CLIENT_ID", "id")
+    monkeypatch.setenv("SPOTIFY_SECRET", "secret")
+    client = spotify_common.build_public_client()
+    assert isinstance(client.auth_manager, SpotifyClientCredentials)
+
+
+def test_build_public_client_without_credentials_raises_systemexit(monkeypatch):
+    monkeypatch.delenv("SPOTIFY_CLIENT_ID", raising=False)
+    monkeypatch.setenv("SPOTIFY_SECRET", "secret")
+    with pytest.raises(SystemExit, match="SPOTIFY_CLIENT_ID"):
+        spotify_common.build_public_client()

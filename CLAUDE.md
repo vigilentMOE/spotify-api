@@ -18,6 +18,9 @@ python create-playlist.py <stats.fm profile URL or username> [--limit N] [--rang
 
 python liked_songs.py [--output liked_songs.txt] [--limit N] [--max-genres N]
 
+python search_tracks.py <query words> [--limit N] [--market CC] [--max-pages N] \
+    [--max-genres N] [--no-genres] [--json] [--output FILE]
+
 python playlist_snapshot.py [--folders folders.json] [--folder NAME] [--output snapshot.json]
 python folder_inventory.py [--inventory folder_inventory.json] [--no-api]
 python propose_folders.py [--snapshot snapshot.json] [--min-size 3] [--min-coverage 0.5]
@@ -32,7 +35,7 @@ pytest tests/test_propose_folders.py::test_classify_genre_matches_keyword_substr
 
 Four scripts, two authentication flows — picking the right flow is the main architectural decision when adding a script:
 
-- **Client-credentials flow** (`SpotifyClientCredentials`): used by `search-authors.py` and `get-artist-genre.py`. Read-only access to the public catalog. No browser, no user context.
+- **Client-credentials flow** (`SpotifyClientCredentials`): used by `search-authors.py`, `get-artist-genre.py` and `search_tracks.py` (via `spotify_common.build_public_client`). Read-only access to the public catalog. No browser, no user context.
 - **OAuth Authorization Code flow** (`SpotifyOAuth`): used by `create-playlist.py`, `playlist_snapshot.py` and `liked_songs.py`. Required for anything touching the user's account (reading private playlists and the saved-track library, creating/modifying playlists). First run opens a browser; the token is cached in `.cache` (gitignored). Scopes are declared per-script (currently `playlist-modify-private playlist-modify-public`). The redirect URI must exactly match one registered in the Spotify app dashboard and must use `127.0.0.1`, not `localhost`.
 
 Credentials come from `.env` (`SPOTIFY_CLIENT_ID`, `SPOTIFY_SECRET`, optional `SPOTIFY_REDIRECT_URI`) loaded with `python-dotenv`. `.env.example` documents the expected keys.
@@ -79,11 +82,43 @@ rendered width, which drops whole genres rather than cutting one mid-word.
 
 `liked_songs.txt` is gitignored personal data.
 
+## Catalogue search by popularity
+
+`search_tracks.py` handles "search Spotify for <X> tracks" / "what are the most
+popular <X> songs" — a live query against the public catalog, ranked by
+popularity. It is the wrong tool for questions about the user's *own* library:
+those are `liked_songs.py` / `liked_songs.txt`. Read-only and
+client-credentials only (`build_public_client`), so it never prompts for OAuth
+or touches `.cache`.
+
+Pipeline, in `gather`: `search_all_pages` → `select_relevant` →
+`collapse_versions` → `rank_by_popularity` → genres for the survivors only.
+Four API behaviours it exists to absorb, all verified live:
+
+- **Results are relevance-ordered, never popularity-ordered**, so the sort
+  happens locally after every page is in — sorting one page is wrong.
+- **A query yields at most 1000 tracks.** `limit` caps at 50 and
+  `limit + offset > 1000` is a 400; narrow the query to see further.
+- **`tracks.total` lies** (reported 485 for a query that still served a full
+  page at offset 950), so paging stops on a short/empty page, never on `total`.
+- **Popularity alone promotes off-target hits** — a raw sort of "super smash
+  brothers soundtrack" is topped by Childish Gambino's "Heartbeat" (pop 89).
+  `select_relevant` requires the query's own words (stopwords like
+  "soundtrack" dropped, `bros`/`brothers`-style abbreviations matched) to
+  appear in the track/album/artist, relaxing through `RELEVANCE_TIERS` only if
+  strict matching finds too little, and logging what it dropped and why.
+
+Output follows `liked_songs.py`: same fixed-width table and `MAX_ROW_WIDTH`,
+minus ADDED, plus `--json` for piping (carries `uri` for playlist writes).
+Tune matching by adding to `STOPWORDS` or the tier list with a test; genres are
+optional (`--no-genres`) because search hits are mostly long-tail cover artists
+carrying none.
+
 ## Playlist folder sorting
 
 Implemented across three importable modules plus a shared helper:
 
-- `spotify_common.py` — `log`, `require_env`, `build_user_client(scope)`, plus the batching helpers `chunked` and `fetch_artist_genres` (50-ID cap) shared by every script that needs artist genres.
+- `spotify_common.py` — `log`, `require_env`, `build_user_client(scope)`, `build_public_client()`, plus the batching helpers `chunked` and `fetch_artist_genres` (50-ID cap) shared by every script that needs artist genres.
 - `playlist_snapshot.py` — reads the API: pages all playlists, fetches each one's tracks, batch-fetches artist genres, writes `snapshot.json`. `--folders`/`--folder` restrict it to a hand-built folder map (with prefix fallback for names transcribed from truncated UI labels).
 - `folder_inventory.py` — the fallback source for playlists the API can't see (below). Emits the same snapshot shape.
 - `propose_folders.py` — pure local analysis. Folds genre strings into ordered families (`GENRE_FAMILIES`, first match wins, specific before broad), groups playlists by source folder then dominant family, and renders a markdown report.

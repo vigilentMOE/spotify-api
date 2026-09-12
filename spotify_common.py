@@ -9,7 +9,7 @@ import sys
 from typing import Callable, Dict, Iterator, List, Optional, Sequence
 
 import spotipy
-from spotipy.oauth2 import SpotifyOAuth
+from spotipy.oauth2 import SpotifyClientCredentials, SpotifyOAuth
 
 load_dotenv()
 
@@ -43,6 +43,21 @@ def build_user_client(scope: str) -> spotipy.Spotify:
         client_secret=require_env("SPOTIFY_SECRET"),
         redirect_uri=os.getenv("SPOTIFY_REDIRECT_URI", DEFAULT_REDIRECT_URI),
         scope=scope,
+    )
+    return spotipy.Spotify(auth_manager=auth)
+
+
+def build_public_client() -> spotipy.Spotify:
+    """Authenticate with the client-credentials flow: app-level, read-only
+    access to the public catalogue.
+
+    Search, artists and albums need no user context, so this opens no
+    browser, requests no scopes and never touches the OAuth token cache in
+    `.cache` -- keep catalogue-only scripts on this flow.
+    """
+    auth = SpotifyClientCredentials(
+        client_id=require_env("SPOTIFY_CLIENT_ID"),
+        client_secret=require_env("SPOTIFY_SECRET"),
     )
     return spotipy.Spotify(auth_manager=auth)
 

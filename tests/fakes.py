@@ -13,6 +13,7 @@ class FakeSpotify:
         artists_by_id: Optional[Dict[str, List[str]]] = None,
         unreadable_playlists: Optional[List[str]] = None,
         saved_tracks: Optional[List[Dict]] = None,
+        tracks_by_query: Optional[Dict[str, List[Dict]]] = None,
     ):
         self._playlists = playlists or []
         self._tracks = tracks_by_playlist or {}
@@ -26,6 +27,10 @@ class FakeSpotify:
         self.saved_tracks_calls: List[tuple] = []
         # query -> raw search response, for seed-track lookups
         self.search_results: Dict[str, Dict] = {}
+        # query -> every catalogue hit, paged through by search() below
+        self._query_tracks = tracks_by_query or {}
+        # (q, limit, offset, market) per call, for paging assertions
+        self.search_calls: List[tuple] = []
 
     def current_user(self) -> Dict:
         return {"id": "testuser", "display_name": "Test User"}
@@ -48,8 +53,29 @@ class FakeSpotify:
             "total": len(self._saved_tracks),
         }
 
-    def search(self, q: str, type: str, limit: int) -> Dict:
-        return self.search_results.get(q, {"tracks": {"items": []}})
+    def search(
+        self,
+        q: str,
+        type: str,
+        limit: int,
+        offset: int = 0,
+        market: Optional[str] = None,
+    ) -> Dict:
+        self.search_calls.append((q, limit, offset, market))
+        if limit > 50:
+            raise SpotifyException(400, -1, "Invalid limit")
+        # The live API rejects deep paging outright, which is what caps a
+        # search at 1000 results.
+        if limit + offset > 1000:
+            raise SpotifyException(
+                400, -1, "Limit + Offset exceeds maximum of 1000"
+            )
+        if q in self.search_results:
+            return self.search_results[q]
+        items = self._query_tracks.get(q, [])[offset:offset + limit]
+        # `total` is an estimate on the live API and routinely understates
+        # what paging actually returns, so it is deliberately wrong here.
+        return {"tracks": {"items": items, "total": 1}}
 
     def artists(self, ids: List[str]) -> Dict:
         self.artists_calls.append(list(ids))
