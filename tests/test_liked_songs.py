@@ -387,3 +387,107 @@ def test_main_requests_only_the_library_read_scope(monkeypatch, capsys):
     monkeypatch.setattr("sys.argv", ["liked_songs.py"])
     liked_songs.main()
     assert seen["scope"] == "user-library-read"
+
+
+def test_fetch_saved_tracks_announces_library_size_before_paging():
+    # 11k-track libraries take minutes; without the total up front a normal
+    # run is indistinguishable from a hang.
+    sp = FakeSpotify(saved_tracks=_library(130))
+    import io
+    import contextlib
+    err = io.StringIO()
+    with contextlib.redirect_stderr(err):
+        liked_songs.fetch_saved_tracks(sp)
+    assert "130" in err.getvalue().splitlines()[0]
+
+
+def test_fetch_saved_tracks_reports_running_progress(capsys):
+    sp = FakeSpotify(saved_tracks=_library(1000))
+    liked_songs.fetch_saved_tracks(sp)
+    err = capsys.readouterr().err
+    assert "500/1000" in err
+    assert "1000/1000" in err
+
+
+def test_fetch_saved_tracks_progress_is_capped_by_limit(capsys):
+    sp = FakeSpotify(saved_tracks=_library(1000))
+    liked_songs.fetch_saved_tracks(sp, limit=200)
+    err = capsys.readouterr().err
+    assert "/200" in err
+    assert "/1000" not in err
+
+
+def test_fetch_saved_tracks_progress_goes_to_stderr_only(capsys):
+    sp = FakeSpotify(saved_tracks=_library(200))
+    liked_songs.fetch_saved_tracks(sp)
+    assert capsys.readouterr().out == ""
+
+
+def test_build_report_reports_artist_lookup_progress(capsys):
+    items = []
+    artists = {}
+    for i in range(300):
+        item = _saved_item()
+        item["track"]["artists"] = [{"id": f"a{i}", "name": f"Artist {i}"}]
+        items.append(item)
+        artists[f"a{i}"] = ["rock"]
+    liked_songs.build_report(FakeSpotify(saved_tracks=items,
+                                         artists_by_id=artists))
+    assert "300/300 artists" in capsys.readouterr().err
+
+
+def test_fit_genres_keeps_everything_that_fits():
+    assert liked_songs.fit_genres(["rap", "trap"], 20) == ["rap", "trap"]
+
+
+def test_fit_genres_drops_whole_trailing_genres_rather_than_cutting_a_word():
+    # "east coast hip hop; boom bap" is 28; adding "underground hip hop"
+    # would reach 49, past the budget, so it is dropped entirely.
+    genres = ["east coast hip hop", "boom bap", "underground hip hop"]
+    assert liked_songs.fit_genres(genres, 30) == ["east coast hip hop",
+                                                  "boom bap"]
+
+
+def test_fit_genres_keeps_the_first_genre_even_when_it_alone_overflows():
+    assert liked_songs.fit_genres(["extraordinarily verbose genre"], 10) == [
+        "extraordi…"
+    ]
+
+
+def test_fit_genres_empty_stays_empty():
+    assert liked_songs.fit_genres([], 40) == []
+
+
+def test_build_row_fits_genres_to_the_column_budget():
+    row = liked_songs.build_row(
+        _saved_item(),
+        {"a1": ["east coast hip hop", "old school hip hop",
+                "hardcore hip hop", "boom bap"]},
+        max_genres=4,
+    )
+    assert len(row["GENRES"]) <= liked_songs.GENRES_WIDTH
+
+
+def test_build_row_max_genres_zero_lifts_the_width_budget_too():
+    # 0 means "give me everything", for LLM consumption over readability.
+    wide = ["genre number %d" % i for i in range(12)]
+    row = liked_songs.build_row(_saved_item(), {"a1": wide}, max_genres=0)
+    assert row["GENRES"] == "; ".join(wide)
+
+
+def test_render_table_caps_every_row_at_the_target_width():
+    item = _saved_item()
+    item["track"]["name"] = "x" * 200
+    item["track"]["album"]["name"] = "y" * 200
+    item["track"]["artists"] = [{"id": "a1", "name": "z" * 200}]
+    row = liked_songs.build_row(
+        item, {"a1": ["long genre name here"] * 8}, max_genres=4
+    )
+    lines = liked_songs.render_table([row], generated_at="x")
+    assert max(len(l) for l in lines) <= liked_songs.MAX_ROW_WIDTH
+
+
+def test_max_row_width_matches_the_declared_columns():
+    padded = sum(w for _, w in liked_songs.COLUMNS if w)
+    gutters = len(liked_songs.GUTTER) * (len(liked_songs.COLUMNS) - 1)
+    assert liked_songs.MAX_ROW_WIDTH == padded + gutters + liked_songs.GENRES_WIDTH

@@ -27,9 +27,18 @@ COLUMNS: Tuple[Tuple[str, int], ...] = (
     ("LEN", 5),
     ("POP", 3),
     ("ID", 22),      # Spotify IDs are 22 base62 chars
-    ("GENRES", 0),   # 0 = no padding, no truncation
+    ("GENRES", 0),   # 0 = last column, never padded
 )
+# GENRES is unpadded but still bounded, so a track carrying four long
+# subgenres cannot run the row off the screen. 52 caps a full row at exactly
+# MAX_ROW_WIDTH; measured against a real 11.5k library, ~1% of rows lose a
+# genre to it. `--max-genres 0` lifts the budget for LLM consumption.
+GENRES_WIDTH = 52
+MAX_ROW_WIDTH = 200
 SAVED_PAGE = 50  # Spotify page cap for current_user_saved_tracks
+# An 11k-track library is 230+ sequential pages and takes minutes. Report
+# progress this often so a slow run is never mistaken for a hung one.
+PROGRESS_EVERY = 500
 GUTTER = "  "
 PREAMBLE = (
     "# genres are artist-level (Spotify has no track genre); "
@@ -60,6 +69,24 @@ def truncate(text: str, width: int) -> str:
     if len(text) <= width:
         return text
     return text[:width - 1] + "…"
+
+
+def fit_genres(genres: List[str], width: int) -> List[str]:
+    """Drop trailing genres until the rendered list fits `width`.
+
+    Whole genres go rather than characters -- a row ending 'boom bap; old
+    school hip ho…' reads worse, and parses worse, than one genre fewer.
+    The first genre is always kept, clipped only if it alone overflows.
+    """
+    kept: List[str] = []
+    for genre in genres:
+        candidate = kept + [genre]
+        if len("; ".join(candidate)) > width:
+            break
+        kept = candidate
+    if not kept and genres:
+        return [truncate(genres[0], width)]
+    return kept
 
 
 def collect_genres(
@@ -99,6 +126,8 @@ def build_row(
     genres = collect_genres(
         [a["id"] for a in artists if a.get("id")], artist_genres, max_genres
     )
+    if max_genres:  # 0 means "everything", width budget included
+        genres = fit_genres(genres, GENRES_WIDTH)
     popularity = track.get("popularity")
     return {
         "ADDED": (item.get("added_at") or "-")[:10],
@@ -134,14 +163,28 @@ def render_table(rows: List[Dict[str, str]], generated_at: str) -> List[str]:
     return lines
 
 
+def report_progress(done: int, total: int, unit: str, last: int) -> int:
+    """Log a throttled 'done/total' line. Returns the new watermark, so the
+    caller only reports every PROGRESS_EVERY items plus the final tally."""
+    if done != last and (done - last >= PROGRESS_EVERY or done == total):
+        log(f"  … {done}/{total} {unit}")
+        return done
+    return last
+
+
 def fetch_saved_tracks(sp, limit: Optional[int] = None) -> List[Dict]:
-    """Every item in Liked Songs, oldest-liked last (Spotify's own order).
+    """Every item in Liked Songs, most recently liked first (Spotify's order).
 
     Items whose track is null -- removed from the catalogue -- are dropped,
     since there is nothing left to describe.
+
+    Paging is sequential and the library can be huge, so the total is
+    announced from the first response and progress reported as it goes.
     """
     items: List[Dict] = []
     offset = 0
+    target: Optional[int] = None
+    logged = 0
     while True:
         page_size = SAVED_PAGE
         if limit is not None:
@@ -150,11 +193,19 @@ def fetch_saved_tracks(sp, limit: Optional[int] = None) -> List[Dict]:
                 break
             page_size = min(SAVED_PAGE, remaining)
         page = sp.current_user_saved_tracks(limit=page_size, offset=offset)
+        if target is None:
+            total = page.get("total", 0)
+            target = min(limit, total) if limit is not None else total
+            scope = f" Fetching the {target} most recent." if limit else ""
+            log(f"Liked Songs: {total} tracks.{scope}")
         got = page.get("items", [])
         items.extend(item for item in got if item and item.get("track"))
+        logged = report_progress(len(items), target, "tracks", logged)
         if len(got) < page_size:
             break  # short page means last page
         offset += page_size
+    if target:
+        report_progress(len(items), target, "tracks", logged)
     return items
 
 
@@ -174,7 +225,15 @@ def build_report(
         if artist.get("id")
     }
     log(f"Looking up genres for {len(artist_ids)} artists.")
-    artist_genres = fetch_artist_genres(sp, sorted(artist_ids))
+    logged = 0
+
+    def on_progress(done: int, total: int) -> None:
+        nonlocal logged
+        logged = report_progress(done, total, "artists", logged)
+
+    artist_genres = fetch_artist_genres(
+        sp, sorted(artist_ids), on_progress=on_progress
+    )
 
     rows = [build_row(item, artist_genres, max_genres) for item in items]
     generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ")

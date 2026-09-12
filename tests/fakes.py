@@ -43,7 +43,10 @@ class FakeSpotify:
 
     def current_user_saved_tracks(self, limit: int, offset: int) -> Dict:
         self.saved_tracks_calls.append((limit, offset))
-        return {"items": self._saved_tracks[offset:offset + limit]}
+        return {
+            "items": self._saved_tracks[offset:offset + limit],
+            "total": len(self._saved_tracks),
+        }
 
     def search(self, q: str, type: str, limit: int) -> Dict:
         return self.search_results.get(q, {"tracks": {"items": []}})

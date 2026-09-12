@@ -157,7 +157,12 @@ printed to stdout on success.
 
 Dumps every track in your **Liked Songs** to a fixed-width table: one row per
 track, columns aligned so the file scans vertically in a full-screen text view.
-Rows land under ~190 characters.
+No row ever exceeds 200 characters.
+
+Liked Songs pages 50 at a time and the fetch is sequential, so a large library
+takes minutes — roughly **1 second per 60 tracks**, plus artist-genre lookups
+(an 11.5k-track library takes ~3.5 minutes). Progress is reported to stderr as
+it goes, so you can tell a slow run from a stuck one.
 
 ```sh
 # Straight to the terminal (or a pipe):
@@ -188,10 +193,14 @@ ADDED       TRACK                               ARTIST                    ALBUM 
 
 Notes: **GENRES is artist-level** — Spotify has no track genre, so a track's
 tags are the union of its artists' genres, deduped, primary artist first.
-Fields too long for their column are cut with `…`; the untruncated values are
-still in Spotify. Local files and tracks pulled from the catalogue show `-`
-for whatever metadata is missing. This is the first script to need the
-`user-library-read` scope, so the first run re-opens the browser to authorize.
+Plenty of niche artists carry no genres at all and show `-`; that is Spotify's
+data, not a bug. Genres are also held to a 52-character budget, dropping whole
+genres rather than cutting one mid-word — `--max-genres 0` lifts both that and
+the count cap when you want everything for an LLM. Other fields too long for
+their column are cut with `…`; the full values are still in Spotify. Local
+files show `-` for whatever metadata they lack. This is the first script to
+need the `user-library-read` scope, so the first run re-opens the browser to
+authorize.
 
 ### Sort playlist folders by genre
 

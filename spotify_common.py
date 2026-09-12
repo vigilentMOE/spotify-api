@@ -6,7 +6,7 @@ so any logic shared between scripts lives here instead.
 from dotenv import load_dotenv
 import os
 import sys
-from typing import Dict, Iterator, List, Sequence
+from typing import Callable, Dict, Iterator, List, Optional, Sequence
 
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
@@ -52,13 +52,23 @@ def chunked(seq: Sequence, size: int) -> Iterator[Sequence]:
         yield seq[start:start + size]
 
 
-def fetch_artist_genres(sp, artist_ids: Sequence[str]) -> Dict[str, List[str]]:
-    """Batched artist-ID -> genre-list map (sp.artists caps at 50 IDs)."""
+def fetch_artist_genres(
+    sp,
+    artist_ids: Sequence[str],
+    on_progress: Optional[Callable[[int, int], None]] = None,
+) -> Dict[str, List[str]]:
+    """Batched artist-ID -> genre-list map (sp.artists caps at 50 IDs).
+
+    Large libraries need hundreds of batches, so `on_progress(done, total)`
+    is called after each one to let the caller show that work is happening.
+    """
     genres: Dict[str, List[str]] = {}
     unique = sorted(set(artist_ids))
-    for batch in chunked(unique, ARTIST_BATCH):
+    for done, batch in enumerate(chunked(unique, ARTIST_BATCH), 1):
         resp = sp.artists(list(batch))
         for artist in resp.get("artists", []):
             if artist:  # Spotify returns null for invalid IDs
                 genres[artist["id"]] = artist.get("genres", [])
+        if on_progress:
+            on_progress(min(done * ARTIST_BATCH, len(unique)), len(unique))
     return genres

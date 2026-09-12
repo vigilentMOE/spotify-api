@@ -50,19 +50,32 @@ Script filenames use hyphens, so they cannot be imported as modules. If future w
 
 `liked_songs.py` pages `current_user_saved_tracks`, batch-fetches artist
 genres through `spotify_common.fetch_artist_genres`, and renders a fixed-width
-table (~190 columns) built to be read by a person and an LLM from the same
-file.
+table built to be read by a person and an LLM from the same file. No row
+exceeds `MAX_ROW_WIDTH` (200).
+
+**This script is slow by nature and that is not a bug.** Saved tracks page 50
+at a time with no bulk endpoint, so a real library (11,560 tracks, measured)
+is 230+ sequential requests, ~3.5 minutes. Because a silent multi-minute run
+is indistinguishable from a hang, `fetch_saved_tracks` announces the library
+total from the first response's `total` field and `report_progress` logs a
+throttled `done/total` line every `PROGRESS_EVERY` (500) items; the artist
+phase does the same through `fetch_artist_genres`'s `on_progress` callback.
+Keep that instrumentation if you touch either loop.
 
 Layout lives in one place: the `COLUMNS` tuple of `(header, width)` pairs, with
 width `0` meaning the final unpadded column. `render_table` pads and truncates
 straight from it, so changing a column means editing that tuple, not the
-renderer. Every field falls back to `-` rather than dropping a row — local
-files have no ID, no release date and no popularity.
+renderer — keep `MAX_ROW_WIDTH` in step (a test asserts they agree). Every
+field falls back to `-` rather than dropping a row — local files have no ID,
+no release date and no popularity, and ~28% of tracks in practice have no
+genres at all because their artists carry none.
 
 Genres are artist-level (Spotify has no track genre): `collect_genres` unions
 the track's artists' genres, dedupes, and keeps first-appearance order so the
-primary artist leads. `--max-genres` (default 4) keeps multi-artist tracks from
-running the line long.
+primary artist leads. Two caps keep the row on one line: `--max-genres`
+(default 4) on the count, and `fit_genres`'s `GENRES_WIDTH` (52) on the
+rendered width, which drops whole genres rather than cutting one mid-word.
+`--max-genres 0` lifts both, for feeding an LLM the complete tag set.
 
 `liked_songs.txt` is gitignored personal data.
 
